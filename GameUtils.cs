@@ -1,0 +1,219 @@
+﻿
+using System.IO;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace MissileView
+{
+    internal class GameUtils
+    {
+        public static Aircraft getAircraft()
+        {
+            return SceneSingleton<CombatHUD>.i.aircraft;
+        }
+
+        public static FactionHQ getHQ()
+        {
+            return getAircraft().NetworkHQ;
+        }
+
+        public static Transform FindChildRecursive(Transform parent, string name)
+        {
+
+            foreach (Transform child in parent)
+            {
+
+                if (child.name.ToLower() == name.ToLower())
+                {
+                    return child;
+                }
+
+                Transform found = FindChildRecursive(child, name);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return null;
+        }
+
+        public static Sprite LoadingImage(string imagePath)
+        {
+            if (!File.Exists(imagePath))
+            {
+                Plugin.Logger.LogWarning("File doesn't exist");
+            
+                return null; // File doesn't exist
+            }
+
+            byte[] imageData = File.ReadAllBytes(imagePath);
+            Texture2D tex = new(1, 1);
+            tex.wrapMode = TextureWrapMode.Clamp;
+            if (ImageConversion.LoadImage(tex, imageData))
+            {
+                Plugin.Logger.LogInfo($"{Path.GetFileName(imagePath)} Loaded");
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+            }
+            return null;
+        }
+
+        // yes i did steal this from george huge shoutout
+        // i stripped it down and added some stuff to the class for my needs
+        public class Draw
+        {
+            public abstract class UIElement
+            {
+                protected GameObject gameObject;
+                protected RectTransform rectTransform;
+                protected Image imageComponent;
+
+                protected UIElement(
+                    string name,
+                    Transform UIParent = null,
+
+                    Material material = null)
+                {
+
+                    if (UIParent != null)
+                    {
+                        foreach (Transform child in UIParent)
+                        {
+                            if (child.name == name)
+                            {
+                                gameObject = child.gameObject;
+                                rectTransform = gameObject.GetComponent<RectTransform>();
+                                imageComponent = gameObject.GetComponent<Image>();
+                                if (material != null) imageComponent.material = material;
+                                return;
+                            }
+                        }
+                    }
+                    // Create a new GameObject for the element
+                    gameObject = new GameObject(name);
+                    gameObject.transform.SetParent(UIParent, false);
+                    rectTransform = gameObject.AddComponent<RectTransform>();
+                    imageComponent = gameObject.AddComponent<Image>();
+                    if (material != null) imageComponent.material = material;
+                    return;
+                }
+
+                public virtual void SetPosition(Vector2 position)
+                {
+                    rectTransform.anchoredPosition = position;
+                }
+
+                public virtual Vector2 GetPosition()
+                {
+                    return rectTransform.anchoredPosition;
+                }
+
+                public virtual void SetColor(Color color)
+                {
+                    imageComponent.color = color;
+                }
+
+
+                public GameObject GetGameObject() => gameObject;
+                public RectTransform GetRectTransform() => rectTransform;
+                public Image GetImageComponent() => imageComponent;
+
+                public void Destroy()
+                {
+                    UnityEngine.Object.Destroy(gameObject);
+                }
+            }
+
+            public class UILabel : UIElement
+            {
+                private Text textComponent;
+                private float backgroundOpacity;
+
+                public UILabel(
+                    string name,
+                    Vector2 position,
+                    Transform UIParent = null,
+                    FontStyle fontStyle = FontStyle.Normal,
+                    Color? color = null,
+                    int fontSize = 24,
+                    float backgroundOpacity = 0.8f,
+                    Material material = null) : base(name, UIParent)
+                {
+                    this.backgroundOpacity = backgroundOpacity;
+                    rectTransform.anchoredPosition = position;
+                    rectTransform.sizeDelta = new Vector2(200, 40);
+                    imageComponent.color = new Color(0, 0, 0, this.backgroundOpacity);
+                    GameObject textObj = new("LabelText");
+                    textObj.transform.SetParent(gameObject.transform, false);
+                    RectTransform textRect = textObj.AddComponent<RectTransform>();
+                    textRect.anchorMin = Vector2.zero;
+                    textRect.anchorMax = Vector2.one;
+                    textRect.offsetMin = Vector2.zero;
+                    textRect.offsetMax = Vector2.zero;
+                    Text textComp = textObj.AddComponent<Text>();
+                    textComp.font = GameUtils.Draw.GetDefaultFont();
+                    textComp.fontSize = fontSize;
+                    textComp.fontStyle = fontStyle;
+                    textComp.color = color ?? Color.white;
+
+                    textComp.alignment = TextAnchor.MiddleCenter;
+                    textComp.text = "";
+                    textComp.horizontalOverflow = HorizontalWrapMode.Overflow;
+                    textComp.verticalOverflow = VerticalWrapMode.Overflow;
+                    rectTransform.sizeDelta = new Vector2(textComp.preferredWidth, textComp.fontSize);
+                    Transform textTransform = gameObject.transform.Find("LabelText");
+                    textComponent = textTransform.GetComponent<Text>();
+                    if (material != null)
+                    {
+                        textComponent.material = material;
+                    }
+                    return;
+                }
+
+                public void SetText(string text)
+                {
+                    textComponent.text = text;
+                    rectTransform.sizeDelta = new Vector2(textComponent.preferredWidth, textComponent.fontSize);
+                }
+
+                public override void SetColor(Color color)
+                {
+                    textComponent.color = color;
+    
+                }
+
+                public void SetFontSize(int size)
+                {
+                    textComponent.fontSize = size;
+                    rectTransform.sizeDelta = new Vector2(textComponent.preferredWidth, textComponent.preferredHeight);
+                }
+
+                public void SetTextAlignment(TextAnchor alignment)
+                {
+                    textComponent.alignment = alignment;
+                }
+
+                public void SetActive(bool active)
+                {
+                   gameObject.gameObject.SetActive(active);
+                }
+
+
+                public Vector2 GetTextSize()
+                {
+                    return new Vector2(textComponent.preferredWidth, textComponent.preferredHeight);
+                }
+
+            }
+
+         
+            public static Font GetDefaultFont()
+            {
+                Text weaponText = SceneSingleton<CombatHUD>.i.GetComponentInChildren<Text>();
+                return weaponText.font;
+            }
+        }
+    }
+
+  
+}
