@@ -3,6 +3,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using MissileView.UI;
 using System.IO;
 using UnityEngine;
 
@@ -51,7 +52,7 @@ namespace MissileView
             Logger.LogInfo($"Patching Harmony...");
             harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             harmony.PatchAll();
-            
+
 
             Logger.LogInfo($"Harmony Patched!");
 
@@ -80,6 +81,9 @@ namespace MissileView
 
             // UI Config
             PluginConfig.cameraResolution = Config.Bind("UI Config", "Camera Resolution", 1024, "The resolution of the missile screen camera. Changes are applied when changing aircraft. This setting can heavily affect performance, reduce if nessecary.");
+
+            // ProfileLoading
+            ProfileManager.LoadProfiles();
         }
 
 

@@ -1,10 +1,11 @@
 ﻿extern alias Engine2;
 using HarmonyLib;
+using MissileView.UI;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace MissileView
+namespace MissileView.Patches
 {
     internal class PatchMissile
     {
@@ -58,7 +59,7 @@ namespace MissileView
 
                     missileCam.gameObject.SetActive(true);
 
-                    PatchTacScreen.missileName.SetText(__instance.unitName);
+                    ProfileManager.currentProfile.missileName.SetText(__instance.unitName);
 
                     missiles.Add(__instance);
 
@@ -92,13 +93,13 @@ namespace MissileView
 
                 if (removedIndex == -1) return;
 
-                bool wasViewing = (removedIndex == currentMissileIndex);
+                bool wasViewing = removedIndex == currentMissileIndex;
 
                 Camera missileCam = __instance.transform.GetComponentInChildren<Camera>(true);
 
                 if (missileCam != null)
                 {
-                    GameObject.Destroy(missileCam.gameObject);
+                    Object.Destroy(missileCam.gameObject);
                 }
 
                 missiles.Remove(__instance);
@@ -107,9 +108,9 @@ namespace MissileView
                 {
                     currentMissileIndex = 0;
 
-                    PatchTacScreen.missileName.SetText("No Missile");
-                    PatchTacScreen.missileIndex.SetActive(false);
-                    PatchTacScreen.velocityVector.SetActive(false);
+                    ProfileManager.currentProfile.missileName.SetText("No Missile");
+                    ProfileManager.currentProfile.missileIndex.SetActive(false);
+                    ProfileManager.currentProfile.velocityVector.SetActive(false);
                     return;
                 }
 
@@ -150,9 +151,9 @@ namespace MissileView
                 missileCam.targetTexture = PatchTacScreen.renderTexture;
                 missileCam.gameObject.SetActive(true);
 
-                PatchTacScreen.missileName.SetText(missiles[currentMissileIndex].unitName);
-                PatchTacScreen.missileIndex.SetActive(true);
-                PatchTacScreen.missileIndex.SetText($"{currentMissileIndex + 1}/{missiles.Count}");
+                ProfileManager.currentProfile.missileName.SetText(missiles[currentMissileIndex].unitName);
+                ProfileManager.currentProfile.missileIndex.SetActive(true);
+                ProfileManager.currentProfile.missileIndex.SetText($"{currentMissileIndex + 1}/{missiles.Count}");
             }
         }
 
@@ -167,12 +168,12 @@ namespace MissileView
 
                     missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true).gameObject.SetActive(false);
 
-                    if (missiles.Count == (currentMissileIndex + 1))
+                    if (missiles.Count == currentMissileIndex + 1)
                     {
 
                         currentMissileIndex = 0;
-                        PatchTacScreen.missileName.SetText("No Missile");
-                        PatchTacScreen.missileIndex.SetActive(false);
+                        ProfileManager.currentProfile.missileName.SetText("No Missile");
+                        ProfileManager.currentProfile.missileIndex.SetActive(false);
 
                     }
                     else
@@ -187,9 +188,9 @@ namespace MissileView
                     {
                         missileCam.targetTexture = PatchTacScreen.renderTexture;
                         missileCam.gameObject.SetActive(true);
-                        PatchTacScreen.missileName.SetText(missiles[currentMissileIndex].unitName);
-                        PatchTacScreen.missileIndex.SetActive(true);
-                        PatchTacScreen.missileIndex.SetText($"{currentMissileIndex + 1}/{missiles.Count}");
+                        ProfileManager.currentProfile.missileName.SetText(missiles[currentMissileIndex].unitName);
+                        ProfileManager.currentProfile.missileIndex.SetActive(true);
+                        ProfileManager.currentProfile.missileIndex.SetText($"{currentMissileIndex + 1}/{missiles.Count}");
                     }
 
                 }
