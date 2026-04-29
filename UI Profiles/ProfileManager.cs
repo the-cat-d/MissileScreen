@@ -84,7 +84,7 @@ namespace MissileView.UI
 
             }
 
-            PatchTacScreen.isPlaneCompatible = true;
+            MissileScreenUIPatching.isPlaneCompatible = true;
 
            
 
@@ -96,7 +96,7 @@ namespace MissileView.UI
 
             profile.missilePanel = UnityEngine.Object.Instantiate(profile.weaponPanel, profile.weaponPanel.transform.parent);
             profile.missilePanel.name = "missilePanel";
-            PatchTacScreen.missilePanelSize = profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
+            MissileScreenUIPatching.missilePanelSize = profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
 
 
 
@@ -134,7 +134,7 @@ namespace MissileView.UI
             profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile.rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
 
             
-            PatchTacScreen.renderTexture = new((int)PatchTacScreen.missilePanelSize.x, (int)PatchTacScreen.missilePanelSize.y, 16, RenderTextureFormat.ARGB32);
+            MissileScreenUIPatching.renderTexture = new((int)MissileScreenUIPatching.missilePanelSize.x, (int)MissileScreenUIPatching.missilePanelSize.y, 16, RenderTextureFormat.ARGB32);
             
             GameObject screen = new("missileScreen");
             screen.transform.parent = profile.missilePanel;
@@ -150,7 +150,7 @@ namespace MissileView.UI
 
 
             RawImage screenImage = screen.AddComponent<RawImage>();
-            screenImage.texture = PatchTacScreen.renderTexture;
+            screenImage.texture = MissileScreenUIPatching.renderTexture;
             screenImage.color = Color.white;
 
 

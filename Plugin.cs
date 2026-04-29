@@ -10,6 +10,8 @@ using UnityEngine;
 namespace MissileView
 {
 
+    // TODO: use Bepinex pubilicizer instead of reflection
+
     public class PluginConfig
     {
         // Keybinds
@@ -24,6 +26,13 @@ namespace MissileView
         // UI Config
 
         public static ConfigEntry<int> cameraResolution;
+
+
+        // Misc
+
+        public static ConfigEntry<Vector3> missileCameraOffset; 
+
+        // TODO: add configs for color adjustment
     }
 
     public class PluginSprites
@@ -81,6 +90,11 @@ namespace MissileView
 
             // UI Config
             PluginConfig.cameraResolution = Config.Bind("UI Config", "Camera Resolution", 1024, "The resolution of the missile screen camera. Changes are applied when changing aircraft. This setting can heavily affect performance, reduce if nessecary.");
+            
+            // TODO: fixed size lockbox option for performance
+
+            // Misc Config
+            PluginConfig.missileCameraOffset = Config.Bind("Misc", "Missile Camera Offset", new Vector3(0,0,4), "Missile");
 
             // ProfileLoading
             ProfileManager.LoadProfiles();
