@@ -84,7 +84,11 @@
     </Reference>
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
+  
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="mkdir &quot;E:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot;&#xD;&#xA;xcopy /q/y/i &quot;$(TargetPath)&quot; &quot;E:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot; /E /H /C" />
+    <Exec Command="mkdir &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot;&#xD;&#xA;xcopy /q/y/i &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot; /E /H /C&#xD;&#xA;xcopy &quot;$(ProjectDir)Assets&quot; &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)\Assets&quot; /E /I /Y" />
   </Target>
 </Project>
