@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MissileView.UI_Profiles.AircraftProfiles
 {
-    internal class EW1
+    internal class EW1 // EW-25 Medusa
     {
         public static void Load()
         {

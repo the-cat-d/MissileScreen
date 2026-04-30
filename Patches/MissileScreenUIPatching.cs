@@ -19,6 +19,8 @@ namespace MissileView.Patches
         public static bool isPlaneCompatible = false;
 
 
+        //// Patches \\\\
+
         // Runs pretty much when the player enters the aircraft
         // All the UI related work from the mod is done in this patch
         [HarmonyPatch(typeof(TacScreen), "Initialize")]
@@ -27,12 +29,16 @@ namespace MissileView.Patches
 
             static void Postfix(TacScreen __instance, Aircraft aircraft, Cockpit cockpit)
             {
-                if (aircraft == GameUtils.getAircraft())
+                var playerAircraft = GameUtils.getAircraft();
+                if (aircraft == null || playerAircraft == null || aircraft != playerAircraft) return;
+
+                try
                 {
                     isPlaneCompatible = false;
 
 
-                    ProfileManager.InjectProfileUI(aircraft.definition.name,__instance,aircraft);
+
+                    ProfileManager.InjectProfileUI(aircraft.definition.name, __instance);
 
 
                     // Clear missile data on start up
@@ -43,8 +49,16 @@ namespace MissileView.Patches
                     Plugin.Logger.LogDebug("Loaded TacScreen");
 
                 }
+                catch (System.Exception e)
+                {
+                    Plugin.Logger.LogError($"Failed to inject UI: {e.Message}");
+                }
+
+
 
             }
+
+
         }
 
 
@@ -57,7 +71,7 @@ namespace MissileView.Patches
         [HarmonyPatch(typeof(TacScreen), "Update")]
         public class TacScreenUpdate
         {
-            
+
             static void Postfix()
             {
                 Update();
@@ -67,13 +81,17 @@ namespace MissileView.Patches
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        //// Functions \\\\
 
-        static int LockBoxSizeConstraint = GetLockboxSizeConstraint(GameUtils.getAircraft());
+
+
 
         private static void Update()
         {
             if (isPlaneCompatible == true)
             {
+                int lockboxMinSize = ProfileManager.currentProfile.lockboxMinSize;
+
                 if (Input.GetKeyDown(PluginConfig.cycleKey.Value))
                 {
 
@@ -100,14 +118,15 @@ namespace MissileView.Patches
                             // Velocity Vector
                             Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;
                             Vector3 vector = Vector3.Scale(missileCam.WorldToScreenPoint(position), new Vector3(1f, 1f, 0f)) - screenCenter;
-                            vector = ClampToScreen(vector);
+                            vector = GameUtils.ClampToScreen(vector,missilePanelSize);
                             ProfileManager.currentProfile.velocityVector.transform.localPosition = vector;
 
                             // Orientation Indicator
+
                             ProfileManager.currentProfile.orientationIndicator.transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
 
 
-                            //Target Box (Position)
+                            // Target Box (Position)
 
                             Renderer renderer;
 
@@ -128,11 +147,13 @@ namespace MissileView.Patches
                             }
 
 
+                            // Target Box (Size)
+
                             Vector3 viewportTargetPosition = missileCam.WorldToScreenPoint(targetPosition);
 
                             Vector3 uiPos = Vector3.Scale(viewportTargetPosition, new Vector3(1, 1, 0)) - screenCenter;
 
-                            uiPos = ClampToScreen(uiPos);
+                            uiPos = GameUtils.ClampToScreen(uiPos, missilePanelSize);
 
 
 
@@ -186,8 +207,8 @@ namespace MissileView.Patches
 
 
                                 rect.sizeDelta = new Vector2(
-                                   Mathf.Max(size.x, LockBoxSizeConstraint),
-                                   Mathf.Max(size.y, LockBoxSizeConstraint)
+                                   Mathf.Max(size.x, lockboxMinSize),
+                                   Mathf.Max(size.y, lockboxMinSize)
                                 );
 
                             }
@@ -195,7 +216,7 @@ namespace MissileView.Patches
                             {
                                 RectTransform rect = ProfileManager.currentProfile.lockBox.GetComponent<RectTransform>();
 
-                                rect.sizeDelta = new Vector2(LockBoxSizeConstraint, LockBoxSizeConstraint);
+                                rect.sizeDelta = new Vector2(lockboxMinSize, lockboxMinSize);
                             }
 
                             if (target != null)
@@ -223,7 +244,7 @@ namespace MissileView.Patches
 
                                     Vector3 leadUiPos = Vector3.Scale(missileCam.WorldToScreenPoint(predictedPosition) - screenCenter, new(1, 1, 0));
 
-                                    leadUiPos = ClampToScreen(leadUiPos);
+                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, missilePanelSize);
 
                                     ProfileManager.currentProfile.leadIcon.transform.localPosition = leadUiPos;
                                 }
@@ -261,31 +282,6 @@ namespace MissileView.Patches
                 }
             }
         }
-
-        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-        private static Vector3 ClampToScreen(Vector3 vector)
-        {
-            return new(Mathf.Clamp(vector.x, -missilePanelSize.x / 2, missilePanelSize.x / 2), Mathf.Clamp(vector.y, -missilePanelSize.y / 2, missilePanelSize.y / 2), 0);
-        }
-
-        
-        private static int GetLockboxSizeConstraint(Aircraft aircraft)
-        {
-            if (aircraft.definition.name == "SFB")
-            {
-                return 20;
-            }
-            else if (aircraft.definition.name == "Multirole1" || aircraft.definition.name == "QuatVTOL1")
-            {
-                return 35;
-            }
-
-            return 50;
-        }
-
-      
 
        
     }

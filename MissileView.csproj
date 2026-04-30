@@ -16,6 +16,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\attackIcon.png" />
+    <None Remove="Assets\leadIcon.png" />
+    <None Remove="Assets\lockBox.png" />
+    <None Remove="Assets\lockBoxCorner.png" />
+    <None Remove="Assets\lockCursor.png" />
+    <None Remove="Assets\orientationIndicator.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\attackIcon.png" />
+    <EmbeddedResource Include="Assets\leadIcon.png" />
+    <EmbeddedResource Include="Assets\lockBox.png" />
+    <EmbeddedResource Include="Assets\lockBoxCorner.png" />
+    <EmbeddedResource Include="Assets\lockCursor.png" />
+    <EmbeddedResource Include="Assets\orientationIndicator.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
@@ -84,11 +102,7 @@
     </Reference>
   </ItemGroup>
   
-  <ItemGroup>
-    <Folder Include="Assets\" />
-  </ItemGroup>
-  
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="mkdir &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot;&#xD;&#xA;xcopy /q/y/i &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot; /E /H /C&#xD;&#xA;xcopy &quot;$(ProjectDir)Assets&quot; &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)\Assets&quot; /E /I /Y" />
+    <Exec Command="mkdir &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot;&#xD;&#xA;xcopy /q/y/i &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\$(TargetName)&quot; /E /H /C&#xD;&#xA;" />
   </Target>
 </Project>

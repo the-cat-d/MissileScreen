@@ -30,7 +30,7 @@ namespace MissileView.UI
             else
             {
                 LoadedProfiles[aircraftName] = profile;
-                Plugin.Logger.LogInfo($"Profile For \"{aircraftName}\" Added ");
+                Plugin.Logger.LogInfo($"Profile For \"{aircraftName}\" Added");
             }
         }
 
@@ -53,6 +53,7 @@ namespace MissileView.UI
         {
             if (LoadedProfiles.ContainsKey(name))
             {
+                Plugin.Logger.LogDebug($"Found \"{name}\" Profile, Loading...");
                 return LoadedProfiles[name];
             } else
             {
@@ -62,8 +63,10 @@ namespace MissileView.UI
             }
         }
 
-        public static void InjectProfileUI(string AircraftName, TacScreen tacScreenInstance, Aircraft aircraft )
+        public static void InjectProfileUI(string AircraftName, TacScreen tacScreenInstance)
         {
+            Plugin.Logger.LogDebug("d");
+
             Profile profile = GetProfileFromName(AircraftName);
 
             if (profile == null )
@@ -106,6 +109,8 @@ namespace MissileView.UI
                 UnityEngine.Object.Destroy(child.gameObject); // Removing all the children in the new missile panel that was cloned
             }
 
+
+            // TODO: finish this (clear all other components besides things such as transform)
             //Component[] panelComponents = profile.missilePanel.GetComponents<Component>();
 
             //foreach (Component component in panelComponents)
@@ -125,15 +130,26 @@ namespace MissileView.UI
                 UnityEngine.Object.Destroy(profile.missilePanel.GetComponent<SystemStatusDisplay>());
 
             }
-            // Aircraft specific panel configurations
-            // Any other aircraft that isn't in these if statement uses the normal configuration
 
 
+            //// Panel Configuration \\\\
+            // These will just use the values it had before if the profile values are unassigned
+
+            // Missile Panel Size
             profile.missilePanel.GetComponent<RectTransform>().sizeDelta = profile.missilePanelRectSize != Vector2.zero ? profile.missilePanelRectSize : profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
+            // Missile Panel Position
             profile.missilePanel.GetComponent<RectTransform>().anchoredPosition = profile.missilePanelRectPosition != Vector2.zero ? profile.missilePanelRectPosition : profile.missilePanel.GetComponent<RectTransform>().anchoredPosition;
+            // Missile Panel Rotation
             profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile.rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
+            // Hierarchy 
+            //profile.missilePanel.SetSiblingIndex(profile.hierachyOrder != -1 ? profile.hierachyOrder : profile.missilePanel.GetSiblingIndex());
 
-            
+
+            //// Panel Creation \\\\
+
+
+            // Screen
+
             MissileScreenUIPatching.renderTexture = new((int)MissileScreenUIPatching.missilePanelSize.x, (int)MissileScreenUIPatching.missilePanelSize.y, 16, RenderTextureFormat.ARGB32);
             
             GameObject screen = new("missileScreen");

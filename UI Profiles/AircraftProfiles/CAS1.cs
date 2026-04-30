@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MissileView.UI_Profiles.AircraftProfiles
 {
-    internal class CAS1
+    internal class CAS1 // A-19 Brawler
     {
         public static void Load()
         {

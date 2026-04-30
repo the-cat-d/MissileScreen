@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MissileView.UI_Profiles.AircraftProfiles
 {
-    internal class AttackHelo1 // SAH-41 Chicane
+    internal class FastBomber1
     {
     }
 }

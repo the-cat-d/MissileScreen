@@ -1,5 +1,7 @@
 ﻿
+using System;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,17 +9,17 @@ namespace MissileView
 {
     internal class GameUtils
     {
-        public static Aircraft getAircraft()
+        internal static Aircraft getAircraft()
         {
             return SceneSingleton<CombatHUD>.i.aircraft;
         }
 
-        public static FactionHQ getHQ()
+        internal static FactionHQ getHQ()
         {
             return getAircraft().NetworkHQ;
         }
 
-        public static Transform FindChildRecursive(Transform parent, string name)
+        internal static Transform FindChildRecursive(Transform parent, string name)
         {
 
             foreach (Transform child in parent)
@@ -38,14 +40,44 @@ namespace MissileView
             return null;
         }
 
-        public static Sprite LoadingImage(string imagePath)
+        internal static Sprite LoadImageInStream(string resourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            var resourcePath = $"{nameof(MissileView)}.Assets.{resourceName}";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
+            {
+                if (stream == null)
+                {
+                    Plugin.Logger.LogError($"Resource \"{resourceName}\" not found: " + resourcePath);
+                    return null;
+                }
+
+                byte[] imageData = new byte[stream.Length];
+                stream.Read(imageData,0, imageData.Length);
+
+                Texture2D tex = new(1, 1);
+                tex.wrapMode = TextureWrapMode.Clamp;
+                if (ImageConversion.LoadImage(tex, imageData))
+                {
+                    Plugin.Logger.LogInfo($"{resourcePath} : {resourceName} Loaded");
+                    return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                }
+                return null;
+
+            }
+           
+        }
+
+        internal static Sprite LoadingImage(string imagePath)
         {
             if (!File.Exists(imagePath))
             {
-                Plugin.Logger.LogWarning("File doesn't exist");
+                Plugin.Logger.LogError("File doesn't exist");
             
                 return null; // File doesn't exist
-            }
+            } 
 
             byte[] imageData = File.ReadAllBytes(imagePath);
             Texture2D tex = new(1, 1);
@@ -58,7 +90,13 @@ namespace MissileView
             return null;
         }
 
-        // yes i did steal this from george huge shoutout
+        internal static Vector3 ClampToScreen(Vector3 vector, Vector2 screenSize)
+        {
+            return new(Mathf.Clamp(vector.x, -screenSize.x / 2, screenSize.x / 2), Mathf.Clamp(vector.y, -screenSize.y / 2, screenSize.y / 2), 0);
+        }
+
+
+        // yes i did steal this from george (thanks george)
         // i stripped it down and added some stuff to the class for my needs
         public class Draw
         {

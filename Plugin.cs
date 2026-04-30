@@ -1,16 +1,18 @@
-﻿extern alias Engine2;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using MissileView.UI;
+using System;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 
 namespace MissileView
 {
 
     // TODO: use Bepinex pubilicizer instead of reflection
+    // TODO: maybe add more logging?
 
     public class PluginConfig
     {
@@ -69,12 +71,27 @@ namespace MissileView
 
             // Sprite Loading
 
-            PluginSprites.AttackSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "attackIcon.png"));
-            PluginSprites.OrientationSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "orientationIndicator.png"));
-            PluginSprites.lockBoxSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "lockBox.png"));
-            PluginSprites.lockCursorSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "lockCursor.png"));
-            PluginSprites.lockCornerSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "lockBoxCorner.png"));
-            PluginSprites.leadSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "leadIcon.png"));
+            var assembly = Assembly.GetExecutingAssembly();
+            string[] resourceNames = assembly.GetManifestResourceNames();
+            foreach (string name in resourceNames)
+            {
+                Console.WriteLine(name);
+            }
+
+
+            PluginSprites.AttackSprite = GameUtils.LoadImageInStream("attackIcon.png");
+            PluginSprites.OrientationSprite = GameUtils.LoadImageInStream("orientationIndicator.png");
+            PluginSprites.lockBoxSprite = GameUtils.LoadImageInStream("lockBox.png");
+            PluginSprites.lockCursorSprite = GameUtils.LoadImageInStream("lockCursor.png");
+            PluginSprites.lockCornerSprite = GameUtils.LoadImageInStream("lockBoxCorner.png");
+            PluginSprites.leadSprite = GameUtils.LoadImageInStream("leadIcon.png");
+
+            //PluginSprites.AttackSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "attackIcon.png"));
+            //PluginSprites.OrientationSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "orientationIndicator.png"));
+            //PluginSprites.lockBoxSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "lockBox.png"));
+            //PluginSprites.lockCursorSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "lockCursor.png"));
+            //PluginSprites.lockCornerSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "lockBoxCorner.png"));
+            //PluginSprites.leadSprite = GameUtils.LoadingImage(Path.Combine(Paths.PluginPath, MyPluginInfo.PLUGIN_GUID, "Assets", "leadIcon.png"));
 
             // Config Initialization
 

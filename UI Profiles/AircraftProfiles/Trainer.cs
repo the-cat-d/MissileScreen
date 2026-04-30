@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MissileView.UI_Profiles.AircraftProfiles
 {
-    internal class Trainer
+    internal class Trainer // T/A-30 Compass
     {
         public static void Load()
         {

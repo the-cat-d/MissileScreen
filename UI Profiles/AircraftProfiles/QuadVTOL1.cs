@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MissileView.UI_Profiles.AircraftProfiles
 {
-    internal class QuadVTOL1
+    internal class QuadVTOL1 // VL-49 Taruntula
     {
         public static void Load()
         {

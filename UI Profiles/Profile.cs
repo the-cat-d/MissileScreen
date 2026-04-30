@@ -11,7 +11,7 @@ namespace MissileView.UI
     internal class Profile
     {
 
-        public static Quaternion rotationDefault =Quaternion.Euler(1,1,1);
+        public static Quaternion rotationDefault = Quaternion.Euler(1,1,1);
 
         // UI
 
@@ -53,7 +53,7 @@ namespace MissileView.UI
         public float lockboxCornerScale = 0.3f;
         public int lockboxMinSize = 50;
         public bool clearOldPanel = false;
-        public int hierachyOrder;
+        public int hierachyOrder = -1;
 
         public void ToggleElements(bool active)
         {

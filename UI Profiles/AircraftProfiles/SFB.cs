@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MissileView.UI_Profiles.AircraftProfiles
 {
-    internal class SFB
+    internal class SFB // SFB-81 Darkreach
     {
         public static void Load()
         {
