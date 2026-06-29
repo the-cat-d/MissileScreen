@@ -16,7 +16,11 @@ namespace MissileView.UI_Profiles.AircraftProfiles
 
                 missilePanelRectSize = new(300, 200),
                 missilePanelRectRotation = Quaternion.Euler(0, 0, -90),
-            },nameof(SFB));
+
+
+                velocityVectorThing = 1,
+                leadIconThing = 1,
+            }, nameof(SFB));
         }
     }
 }

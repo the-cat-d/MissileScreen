@@ -17,7 +17,7 @@ namespace MissileView.UI_Profiles.AircraftProfiles
                 missilePanelRectSize = new(384, 250),
                 missilePanelRectPosition = new(312, 24),
                 missilePanelRectRotation = Quaternion.identity
-            }, nameof(CAS1));
+            }, "CAS1");
         }
     }
 }

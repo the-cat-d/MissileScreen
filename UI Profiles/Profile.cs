@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 namespace MissileView.UI
@@ -15,6 +16,8 @@ namespace MissileView.UI
 
         // UI
 
+        public GameObject screen;
+
         public GameUtils.Draw.UILabel missileName;
         public GameUtils.Draw.UILabel missileTargetName;
         public GameUtils.Draw.UILabel missileIndex;
@@ -22,10 +25,14 @@ namespace MissileView.UI
         public GameUtils.Draw.UILabel missileRange;
         public GameUtils.Draw.UILabel missileAltitude;
 
+
         public GameObject velocityVector;
         public GameObject orientationIndicator;
         public GameObject lockBox;
         public GameObject leadIcon;
+
+        public GameObject screenVolume;
+        public ColorAdjustments colorAdjust;
 
 
         // Misc
@@ -52,8 +59,11 @@ namespace MissileView.UI
         public float leadIconScale = 1;
         public float lockboxCornerScale = 0.3f;
         public int lockboxMinSize = 50;
-        public bool clearOldPanel = false;
+        public bool clearOldPanel = true;
         public int hierachyOrder = -1;
+
+        public float velocityVectorThing = 4;
+        public float leadIconThing = 2;
 
         public void ToggleElements(bool active)
         {
@@ -70,6 +80,14 @@ namespace MissileView.UI
 
         }
 
+        public  void NoMissileDisplay()
+        {
+            
+            missileName.SetText("No Missile");
+            missileIndex.SetActive(false);
+            velocityVector.SetActive(false);
+            screen.SetActive(false);
+        }
 
     }
 }

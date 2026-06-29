@@ -2,6 +2,7 @@
 using MissileView.UI;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 
 namespace MissileView.Patches
@@ -15,7 +16,7 @@ namespace MissileView.Patches
         [HarmonyPatch(typeof(Missile), "StartMissile")]
         public static class OnMissileLaunch
         {
-
+            
             static void Postfix(Missile __instance)
             {
 
@@ -52,6 +53,7 @@ namespace MissileView.Patches
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        static private Camera currentMissileCamera = null;
 
         private static void OnMissileStart(Missile __instance)
         {
@@ -81,16 +83,20 @@ namespace MissileView.Patches
                 }
 
 
+                currentMissileCamera = missileCam;
+
                 Plugin.Logger.LogDebug(PluginConfig.cameraRenderDistance.Value);
                 missileCam.farClipPlane = PluginConfig.cameraRenderDistance.Value;
                 missileCam.fieldOfView = PluginConfig.cameraFOV.Value;
                 missileCam.transform.localPosition = PluginConfig.missileCameraOffset.Value;
                 missileCam.transform.rotation = Quaternion.Euler(missileCam.transform.rotation.eulerAngles.x, missileCam.transform.rotation.eulerAngles.y, GameUtils.getAircraft().transform.rotation.eulerAngles.z);
 
+                
 
                 missileCam.targetTexture = MissileScreenUIPatching.renderTexture;
 
                 missileCam.gameObject.SetActive(true);
+                ProfileManager.currentProfile.screen.SetActive(true);
 
                 ProfileManager.currentProfile.missileName.SetText(__instance.unitName);
 
@@ -100,10 +106,6 @@ namespace MissileView.Patches
 
 
             }
-
-
-
-
 
 
             Plugin.Logger.LogMessage("Missile Launched " + __instance.name);
@@ -133,10 +135,8 @@ namespace MissileView.Patches
             if (missiles.Count == 0)
             {
                 currentMissileIndex = 0;
+                ProfileManager.currentProfile.NoMissileDisplay();
 
-                ProfileManager.currentProfile.missileName.SetText("No Missile");
-                ProfileManager.currentProfile.missileIndex.SetActive(false);
-                ProfileManager.currentProfile.velocityVector.SetActive(false);
                 return;
             }
 
@@ -165,6 +165,23 @@ namespace MissileView.Patches
 
         }
 
+        private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+        {
+            if (camera == currentMissileCamera)
+            {
+                RenderSettings.fog = false;
+            }
+        }
+
+        //// Token: 0x060010E3 RID: 4323 RVA: 0x00082E07 File Offset: 0x00081007
+        //private void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
+        //{
+        //    if (camera == this.cam)
+        //    {
+        //        RenderSettings.fog = true;
+        //    }
+        //}
+
         public static void ActivateMissile(int index)
         {
             if (index < 0 || index >= missiles.Count)
@@ -180,6 +197,7 @@ namespace MissileView.Patches
                 ProfileManager.currentProfile.missileName.SetText(missiles[currentMissileIndex].unitName);
                 ProfileManager.currentProfile.missileIndex.SetActive(true);
                 ProfileManager.currentProfile.missileIndex.SetText($"{currentMissileIndex + 1}/{missiles.Count}");
+               
             }
         }
 
@@ -196,10 +214,8 @@ namespace MissileView.Patches
 
                     if (missiles.Count == currentMissileIndex + 1)
                     {
-
                         currentMissileIndex = 0;
-                        ProfileManager.currentProfile.missileName.SetText("No Missile");
-                        ProfileManager.currentProfile.missileIndex.SetActive(false);
+                        ProfileManager.currentProfile.NoMissileDisplay();
 
                     }
                     else
@@ -217,6 +233,7 @@ namespace MissileView.Patches
                         ProfileManager.currentProfile.missileName.SetText(missiles[currentMissileIndex].unitName);
                         ProfileManager.currentProfile.missileIndex.SetActive(true);
                         ProfileManager.currentProfile.missileIndex.SetText($"{currentMissileIndex + 1}/{missiles.Count}");
+                        ProfileManager.currentProfile.screen.SetActive(true);
                     }
 
                 }
@@ -224,5 +241,8 @@ namespace MissileView.Patches
             }
 
         }
+    
+       
+
     }
 }

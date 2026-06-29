@@ -65,7 +65,6 @@ namespace MissileView.UI
 
         public static void InjectProfileUI(string AircraftName, TacScreen tacScreenInstance)
         {
-            Plugin.Logger.LogDebug("d");
 
             Profile profile = GetProfileFromName(AircraftName);
 
@@ -111,16 +110,18 @@ namespace MissileView.UI
 
 
             // TODO: finish this (clear all other components besides things such as transform)
-            //Component[] panelComponents = profile.missilePanel.GetComponents<Component>();
+            Component[] panelComponents = profile.missilePanel.GetComponents<Component>();
 
-            //foreach (Component component in panelComponents)
-            //{
-            //    if (!)
-            //}
-
-            if (!profile.clearOldPanel)
+            foreach (Component component in panelComponents)
             {
-                profile.weaponPanel.gameObject.SetActive(false); // Clearing of the old panel that was instantiated
+                if ((component is Image)) {
+                    Component.Destroy(component);
+                }
+            }
+
+            if (profile.clearOldPanel)
+            {
+                profile.weaponPanel.gameObject.SetActive(true); // Clearing of the old panel that was instantiated
             }
 
 
@@ -141,7 +142,8 @@ namespace MissileView.UI
             profile.missilePanel.GetComponent<RectTransform>().anchoredPosition = profile.missilePanelRectPosition != Vector2.zero ? profile.missilePanelRectPosition : profile.missilePanel.GetComponent<RectTransform>().anchoredPosition;
             // Missile Panel Rotation
             profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile.rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
-            // Hierarchy 
+
+            // Hierarchy - currently unused, keeping it just incase if i need it
             //profile.missilePanel.SetSiblingIndex(profile.hierachyOrder != -1 ? profile.hierachyOrder : profile.missilePanel.GetSiblingIndex());
 
 
@@ -151,23 +153,28 @@ namespace MissileView.UI
             // Screen
 
             MissileScreenUIPatching.renderTexture = new((int)MissileScreenUIPatching.missilePanelSize.x, (int)MissileScreenUIPatching.missilePanelSize.y, 16, RenderTextureFormat.ARGB32);
-            
-            GameObject screen = new("missileScreen");
-            screen.transform.parent = profile.missilePanel;
-            screen.transform.localPosition = Vector3.zero;
-            screen.transform.localRotation = Quaternion.Euler(0, 0, 0);
-            screen.transform.localScale = new Vector3(1, 1, 0);
 
+            profile.screen = new("missileScreen");
+            profile.screen.transform.parent = profile.missilePanel;
+            profile.screen.transform.localPosition = Vector3.zero;
+            profile.screen.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            profile.screen.transform.localScale = new Vector3(1, 1, 0);
+            profile.screen.SetActive(false);
 
-            RectTransform screenRect = screen.AddComponent<RectTransform>();
+            RectTransform screenRect = profile.screen.AddComponent<RectTransform>();
             screenRect.anchorMin = Vector2.zero;
             screenRect.anchorMax = Vector2.one;
             screenRect.sizeDelta = Vector2.zero;
 
 
-            RawImage screenImage = screen.AddComponent<RawImage>();
+            RawImage screenImage = profile.screen.AddComponent<RawImage>();
             screenImage.texture = MissileScreenUIPatching.renderTexture;
             screenImage.color = Color.white;
+
+            // Screen Post-Processing
+
+            profile.screenVolume = new("screenPostProccessing");
+            profile.screenVolume.transform.parent = profile.missilePanel;
 
 
             // Flight Path

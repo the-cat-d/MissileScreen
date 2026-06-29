@@ -4,7 +4,6 @@ using BepInEx.Logging;
 using HarmonyLib;
 using MissileView.UI;
 using System;
-using System.IO;
 using System.Reflection;
 using UnityEngine;
 
@@ -13,6 +12,7 @@ namespace MissileView
 
     // TODO: use Bepinex pubilicizer instead of reflection
     // TODO: maybe add more logging?
+    // TODO: IR mode
 
     public class PluginConfig
     {

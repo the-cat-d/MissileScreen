@@ -49,9 +49,9 @@ namespace MissileView.Patches
                     Plugin.Logger.LogDebug("Loaded TacScreen");
 
                 }
-                catch (System.Exception e)
+                catch (System.Exception error)
                 {
-                    Plugin.Logger.LogError($"Failed to inject UI: {e.Message}");
+                    Plugin.Logger.LogError($"Failed to inject UI: {error.Message}");
                 }
 
 
@@ -105,6 +105,7 @@ namespace MissileView.Patches
                     if (MissilePatching.missiles[MissilePatching.currentMissileIndex] != null)
                     {
 
+                       
                         Missile currentMissile = MissilePatching.missiles[MissilePatching.currentMissileIndex];
 
                         Camera missileCam = currentMissile.transform.GetComponentInChildren<Camera>(true);
@@ -115,17 +116,7 @@ namespace MissileView.Patches
                             Vector3 screenCenter = new Vector3(missilePanelSize.x / 2, missilePanelSize.y / 2, 0);
                             ProfileManager.currentProfile.ToggleElements(true);
 
-                            // Velocity Vector
-                            Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;
-                            Vector3 vector = Vector3.Scale(missileCam.WorldToScreenPoint(position), new Vector3(1f, 1f, 0f)) - screenCenter;
-                            vector = GameUtils.ClampToScreen(vector,missilePanelSize);
-                            ProfileManager.currentProfile.velocityVector.transform.localPosition = vector;
-
-                            // Orientation Indicator
-
-                            ProfileManager.currentProfile.orientationIndicator.transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
-
-
+                           
                             // Target Box (Position)
 
                             Renderer renderer;
@@ -145,21 +136,12 @@ namespace MissileView.Patches
                                 renderer = null;
                                 ProfileManager.currentProfile.lockBox.SetActive(false);
                             }
-
+                            Vector3 viewportTargetPosition = missileCam.WorldToScreenPoint(targetPosition);
 
                             // Target Box (Size)
 
-                            Vector3 viewportTargetPosition = missileCam.WorldToScreenPoint(targetPosition);
 
-                            Vector3 uiPos = Vector3.Scale(viewportTargetPosition, new Vector3(1, 1, 0)) - screenCenter;
-
-                            uiPos = GameUtils.ClampToScreen(uiPos, missilePanelSize);
-
-
-
-                            ProfileManager.currentProfile.lockBox.transform.localPosition = uiPos;
-
-
+                            Vector2 lockboxSize;
 
                             if (renderer != null)
                             {
@@ -210,6 +192,7 @@ namespace MissileView.Patches
                                    Mathf.Max(size.x, lockboxMinSize),
                                    Mathf.Max(size.y, lockboxMinSize)
                                 );
+                                lockboxSize = rect.sizeDelta;
 
                             }
                             else
@@ -217,7 +200,17 @@ namespace MissileView.Patches
                                 RectTransform rect = ProfileManager.currentProfile.lockBox.GetComponent<RectTransform>();
 
                                 rect.sizeDelta = new Vector2(lockboxMinSize, lockboxMinSize);
+                                lockboxSize = rect.sizeDelta;
                             }
+
+                            Vector3 uiPos = Vector3.Scale(viewportTargetPosition, new Vector3(1, 1, 0)) - screenCenter;
+
+                            uiPos = GameUtils.ClampToScreen(uiPos, missilePanelSize,lockboxSize);
+
+
+
+                            ProfileManager.currentProfile.lockBox.transform.localPosition = uiPos;
+
 
                             if (target != null)
                             {
@@ -244,9 +237,17 @@ namespace MissileView.Patches
 
                                     Vector3 leadUiPos = Vector3.Scale(missileCam.WorldToScreenPoint(predictedPosition) - screenCenter, new(1, 1, 0));
 
-                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, missilePanelSize);
+
+
+                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, missilePanelSize, ProfileManager.currentProfile.leadIcon.GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.leadIconThing);
 
                                     ProfileManager.currentProfile.leadIcon.transform.localPosition = leadUiPos;
+                                } else
+                                {
+                                    
+
+                                   
+                                    ProfileManager.currentProfile.leadIcon.transform.localPosition = uiPos;
                                 }
                             }
                             else
@@ -264,8 +265,26 @@ namespace MissileView.Patches
                             ProfileManager.currentProfile.missileSpeed.SetText($"SPD {UnitConverter.SpeedReading(Mathf.Round(currentMissile.speed))}");
                             ProfileManager.currentProfile.missileAltitude.SetText($"ALT {UnitConverter.AltitudeReading(currentMissile.radarAlt)}");
 
-                            return;
+                          
+
+                      
+
+                            // Velocity Vector
+                            Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;
+                            Vector3 vector = Vector3.Scale(missileCam.WorldToScreenPoint(position), new Vector3(1f, 1f, 0f)) - screenCenter;
+                            vector = GameUtils.ClampToScreen(vector, missilePanelSize, ProfileManager.currentProfile.velocityVector.GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.velocityVectorThing);
+                            ProfileManager.currentProfile.velocityVector.transform.localPosition = vector;
+
+                            // Orientation Indicator
+
+                            ProfileManager.currentProfile.orientationIndicator.transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
+
+
+
+                            
                         }
+
+                     
 
 
                     }
