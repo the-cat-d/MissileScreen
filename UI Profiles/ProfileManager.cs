@@ -192,8 +192,10 @@ namespace MissileView.UI
 
             Image velImageComp = velImage.AddComponent<Image>();
             velImageComp.sprite = PluginSprites.AttackSprite;
-            velImageComp.color = Color.green;
-            velImage.AddComponent<Outline>();
+            velImageComp.color = PluginConfig.velocityVectorColor.Value;
+            Outline velOutline = velImage.AddComponent<Outline>();
+            velOutline.effectColor = PluginConfig.velocityVectorOutlineColor.Value;
+            velOutline.effectDistance = new(PluginConfig.velocityVectorOutlineThickness.Value, PluginConfig.velocityVectorOutlineThickness.Value);
 
             // Orienation Indicator
 
@@ -205,10 +207,12 @@ namespace MissileView.UI
 
             Image orientationImageComp = profile.orientationIndicator.GetComponent<Image>();
             orientationImageComp.sprite = PluginSprites.OrientationSprite;
-            orientationImageComp.color = Color.green;
+            orientationImageComp.color = PluginConfig.orientationIndicatorColor.Value;
 
 
-            profile.orientationIndicator.AddComponent<Outline>();
+            Outline orientationIndicatorOutline = profile.orientationIndicator.AddComponent<Outline>();
+            orientationIndicatorOutline.effectColor = PluginConfig.orientationIndicatorOutlineColor.Value;
+            orientationIndicatorOutline.effectDistance = new(PluginConfig.orientationIndicatorOutlineThickness.Value, PluginConfig.orientationIndicatorOutlineThickness.Value);
 
             // Lockbox
 
@@ -217,6 +221,7 @@ namespace MissileView.UI
             profile.lockBox.transform.localPosition = Vector3.zero;
             profile.lockBox.transform.localRotation = Quaternion.Euler(0, 0, 0);
             profile.lockBox.transform.localScale = new Vector3(profile.leadIconScale, profile.leadIconScale, 0);
+            profile.lockBox.GetComponent<RectTransform>().sizeDelta = new(profile.lockboxMinSize, profile.lockboxMinSize);
 
 
             CreateLockBoxCorner(profile.lockBox.transform, new(profile.lockboxCornerScale, profile.lockboxCornerScale, 0), new(0, 1), new(0, 1));
@@ -227,21 +232,26 @@ namespace MissileView.UI
 
 
             // Lead Icon
-            profile.leadIcon = new("leadIcon", typeof(Image), typeof(Outline));
+            profile.leadIcon = new("leadIcon", typeof(Image));
             profile.leadIcon.transform.parent = profile.missilePanel.transform;
             profile.leadIcon.transform.localPosition = Vector3.zero;
             profile.leadIcon.transform.localRotation = Quaternion.identity;
             profile.leadIcon.transform.localScale = new(profile.leadIconScale, profile.leadIconScale,0);
             Image leadImage = profile.leadIcon.GetComponent<Image>();
             leadImage.sprite = PluginSprites.leadSprite;
-            leadImage.color = new(0, 1, 0);
+            leadImage.color = PluginConfig.leadIconColor.Value;
+
+            Outline leadOutline = profile.leadIcon.AddComponent<Outline>();
+            leadOutline.effectColor = PluginConfig.leadIconOutlineColor.Value;
+            leadOutline.effectDistance = new(PluginConfig.leadIconOutlineThickness.Value, PluginConfig.leadIconOutlineThickness.Value);
+
 
 
             // Missile Name 
 
             profile.missileName = new("missileName", new(0, 0), profile.missilePanel);
             profile.missileName.SetText("No Missile");
-            profile.missileName.SetColor(new(1f, 0f, 1f));
+            profile.missileName.SetColor(PluginConfig.missileNameColor.Value);
             profile.missileName.SetFontSize(profile.fontSize);
             profile.missileName.SetTextAlignment(TextAnchor.MiddleLeft);
 
@@ -343,12 +353,14 @@ namespace MissileView.UI
             lockCorner.transform.localScale = Scale;
 
             lockCorner.AddComponent<Image>().sprite = PluginSprites.lockCornerSprite;
-            lockCorner.GetComponent<Image>().color = new(0f, 1f, 1f);
+            lockCorner.GetComponent<Image>().color = PluginConfig.lockBoxColor.Value;
             RectTransform cornerTLRect = lockCorner.GetComponent<RectTransform>();
             cornerTLRect.anchorMin = anchor;
             cornerTLRect.anchorMax = anchor;
             cornerTLRect.pivot = pivot;
-            lockCorner.AddComponent<Outline>();
+            Outline lockCornerOutline = lockCorner.AddComponent<Outline>();
+            lockCornerOutline.effectColor = PluginConfig.lockBoxOutlineColor.Value;
+            lockCornerOutline.effectDistance = new(PluginConfig.lockBoxOutlineThickness.Value, PluginConfig.lockBoxOutlineThickness.Value);
         }
 
     }

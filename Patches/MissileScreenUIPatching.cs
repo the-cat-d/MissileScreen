@@ -110,19 +110,24 @@ namespace MissileView.Patches
 
                         Camera missileCam = currentMissile.transform.GetComponentInChildren<Camera>(true);
 
+                        
 
                         if (missileCam != null)
                         {
                             Vector3 screenCenter = new Vector3(missilePanelSize.x / 2, missilePanelSize.y / 2, 0);
                             ProfileManager.currentProfile.ToggleElements(true);
 
-                           
-                            // Target Box (Position)
+
+                            // Target Box (Size)
+
+                            Vector2 minLockbox = new Vector2(lockboxMinSize, lockboxMinSize);
 
                             Renderer renderer;
 
                             Unit target = (Unit)targetField.GetValue(currentMissile);
                             Vector3 targetPosition;
+
+
 
                             if (target != null)
                             {
@@ -138,15 +143,17 @@ namespace MissileView.Patches
                             }
                             Vector3 viewportTargetPosition = missileCam.WorldToScreenPoint(targetPosition);
 
-                            // Target Box (Size)
+
+                            Vector2 lockboxSize = minLockbox;
 
 
-                            Vector2 lockboxSize;
+                            
 
-                            if (renderer != null)
+                            RectTransform rect = ProfileManager.currentProfile.lockBox.GetComponent<RectTransform>();
+                            if (renderer != null && PluginConfig.fixedLockBox.Value == false)
                             {
                                 Bounds bounds = renderer.bounds;
-
+                               
                                 Vector3[] corners = new Vector3[8];
 
                                 Vector3 min = bounds.min;
@@ -184,7 +191,6 @@ namespace MissileView.Patches
 
 
 
-                                RectTransform rect = ProfileManager.currentProfile.lockBox.GetComponent<RectTransform>();
 
 
 
@@ -195,13 +201,15 @@ namespace MissileView.Patches
                                 lockboxSize = rect.sizeDelta;
 
                             }
-                            else
+                            else if (rect.sizeDelta != minLockbox)
                             {
-                                RectTransform rect = ProfileManager.currentProfile.lockBox.GetComponent<RectTransform>();
+                                
 
                                 rect.sizeDelta = new Vector2(lockboxMinSize, lockboxMinSize);
                                 lockboxSize = rect.sizeDelta;
                             }
+
+                            // Position
 
                             Vector3 uiPos = Vector3.Scale(viewportTargetPosition, new Vector3(1, 1, 0)) - screenCenter;
 
@@ -244,8 +252,6 @@ namespace MissileView.Patches
                                     ProfileManager.currentProfile.leadIcon.transform.localPosition = leadUiPos;
                                 } else
                                 {
-                                    
-
                                    
                                     ProfileManager.currentProfile.leadIcon.transform.localPosition = uiPos;
                                 }
