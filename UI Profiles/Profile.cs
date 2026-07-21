@@ -1,18 +1,22 @@
 ﻿using MissileView.Patches;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace MissileView.UI
 {
     
     internal class Profile
     {
+        // Public Static
 
         public static Quaternion rotationDefault = Quaternion.Euler(1,1,1);
+        public static Vector2 positionDefault = new Vector2(1.0001f, 1.001f); // yes really specific ik...
+
+
 
         // UI
 
@@ -31,9 +35,7 @@ namespace MissileView.UI
         public GameObject lockBox;
         public GameObject leadIcon;
 
-        public GameObject screenVolume;
-        public ColorAdjustments colorAdjust;
-
+ 
 
         // Misc
 
@@ -42,9 +44,11 @@ namespace MissileView.UI
         public Transform missilePanel;
 
 
+
+
         // Unique Aircraft Config
 
-        public Vector2 missilePanelRectPosition;
+        public Vector2 missilePanelRectPosition = positionDefault;
         public Vector2 missilePanelRectSize;
         public Quaternion missilePanelRectRotation = rotationDefault;
 
@@ -64,6 +68,8 @@ namespace MissileView.UI
 
         public float velocityVectorThing = 4;
         public float leadIconThing = 2;
+
+       
 
         public void ToggleElements(bool active)
         {
@@ -88,6 +94,9 @@ namespace MissileView.UI
             velocityVector.SetActive(false);
             screen.SetActive(false);
         }
+
+       
+      
 
     }
 }

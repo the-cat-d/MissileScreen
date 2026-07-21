@@ -11,10 +11,13 @@ namespace MissileView.UI_Profiles.AircraftProfiles
         {
             ProfileManager.AddProfile(new Profile
             {
+                missilePanelRectSize = new(490, 364),
+                missilePanelRectPosition = new(0, 0),
+
+                //fontSize = 30,
+                //lockboxMinSize = 20,
 
 
-                fontSize = 30,
-                lockboxMinSize = 20,
 
                 LeftPanelPivotYOffset = 2.52f,
                 RightPanelPivotYOffset = 2.25f

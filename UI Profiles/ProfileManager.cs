@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 namespace MissileView.UI
@@ -139,7 +141,7 @@ namespace MissileView.UI
             // Missile Panel Size
             profile.missilePanel.GetComponent<RectTransform>().sizeDelta = profile.missilePanelRectSize != Vector2.zero ? profile.missilePanelRectSize : profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
             // Missile Panel Position
-            profile.missilePanel.GetComponent<RectTransform>().anchoredPosition = profile.missilePanelRectPosition != Vector2.zero ? profile.missilePanelRectPosition : profile.missilePanel.GetComponent<RectTransform>().anchoredPosition;
+            profile.missilePanel.GetComponent<RectTransform>().anchoredPosition = profile.missilePanelRectPosition != Profile.positionDefault ? profile.missilePanelRectPosition : profile.missilePanel.GetComponent<RectTransform>().anchoredPosition;
             // Missile Panel Rotation
             profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile.rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
 
@@ -171,11 +173,9 @@ namespace MissileView.UI
             screenImage.texture = MissileScreenUIPatching.renderTexture;
             screenImage.color = Color.white;
 
-            // Screen Post-Processing
-
-            profile.screenVolume = new("screenPostProccessing");
-            profile.screenVolume.transform.parent = profile.missilePanel;
-
+          
+            
+            
 
             // Flight Path
 

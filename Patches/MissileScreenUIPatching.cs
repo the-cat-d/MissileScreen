@@ -63,7 +63,7 @@ namespace MissileView.Patches
 
 
 
-        static FieldInfo targetField = typeof(Missile).GetField("target", BindingFlags.NonPublic | BindingFlags.Instance);
+        
 
         // The main update function of the mod
         // i used this because i only want to run whenever the player is in an aircraft and because the TacScreen 
@@ -124,7 +124,7 @@ namespace MissileView.Patches
 
                             Renderer renderer;
 
-                            Unit target = (Unit)targetField.GetValue(currentMissile);
+                            Unit target = currentMissile.target;
                             Vector3 targetPosition;
 
 

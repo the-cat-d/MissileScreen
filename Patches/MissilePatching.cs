@@ -3,6 +3,7 @@ using MissileView.UI;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 
 namespace MissileView.Patches
@@ -13,47 +14,85 @@ namespace MissileView.Patches
         public static List<Missile> missiles = new();
         public static int currentMissileIndex = 0;
 
-        [HarmonyPatch(typeof(Missile), "StartMissile")]
-        public static class OnMissileLaunch
-        {
-            
-            static void Postfix(Missile __instance)
-            {
 
-                OnMissileStart(__instance);
+        internal class MiscMissilePatches
+        {
+            [HarmonyPatch(typeof(SubmunitionDispenser), "JettisonCasings")]
+            public static class OnClusterDestroy
+            {
+                static void Postfix(SubmunitionDispenser __instance)
+                {
+                    OnDetonate(__instance.gameObject.GetComponent<Missile>());
+
+                }
 
             }
         }
 
-
-
-        [HarmonyPatch(typeof(SubmunitionDispenser), "JettisonCasings")]
-        public static class OnClusterDestroy
+        internal class MissilePatches 
         {
-            static void Postfix(SubmunitionDispenser __instance)
+
+            [HarmonyPatch(typeof(Missile), "StartMissile")]
+            public static class OnMissileLaunch
             {
-                OnDetonate(__instance.gameObject.GetComponent<Missile>());
+
+                static void Postfix(Missile __instance)
+                {
+
+                    OnMissileStart(__instance);
+
+                }
+            }
+
+
+            [HarmonyPatch(typeof(Missile), "UserCode_RpcDetonate_897349600")]
+            public static class OnMissileDestroy
+            {
+                static void Postfix(Missile __instance)
+                {
+                    OnDetonate(__instance);
+
+                }
 
             }
 
         }
 
-
-        [HarmonyPatch(typeof(Missile), "UserCode_RpcDetonate_897349600")]
-        public static class OnMissileDestroy
+        internal class TargetCamPatches
         {
-            static void Postfix(Missile __instance)
-            {
-                OnDetonate(__instance);
 
+            [HarmonyPatch(typeof(TargetCam), "OnBeginCameraRendering")]
+            public class TargetCamBeginUpdate
+            {
+                static bool Prefix(TargetCam __instance, ScriptableRenderContext context, Camera camera)
+                {
+                    if (camera == __instance.cam || camera == MissilePatching.currentMissileCamera)
+                    {
+                        RenderSettings.fog = !__instance.IRMode;
+                    }
+                    return false;
+                }
             }
 
+            [HarmonyPatch(typeof(TargetCam), "OnEndCameraRendering")]
+            public class TargetCamEndUpdate
+            {
+                static bool Prefix(TargetCam __instance, ScriptableRenderContext context, Camera camera)
+                {
+                    if (camera == __instance.cam || camera == MissilePatching.currentMissileCamera)
+                    {
+                        RenderSettings.fog = true;
+                    }
+                    return false;
+                }
+            }
         }
+
 
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        static private Camera currentMissileCamera = null;
+        static public Camera currentMissileCamera = null;
 
         private static void OnMissileStart(Missile __instance)
         {
@@ -90,8 +129,13 @@ namespace MissileView.Patches
                 missileCam.fieldOfView = PluginConfig.cameraFOV.Value;
                 missileCam.transform.localPosition = PluginConfig.missileCameraOffset.Value;
                 missileCam.transform.rotation = Quaternion.Euler(missileCam.transform.rotation.eulerAngles.x, missileCam.transform.rotation.eulerAngles.y, GameUtils.getAircraft().transform.rotation.eulerAngles.z);
+                missileCam.GetComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
 
-                
+                missileCam.GetComponent<UniversalAdditionalCameraData>().volumeLayerMask = 256;
+
+                // TODO: Remove AudioListener from missile cam
+
+
 
                 missileCam.targetTexture = MissileScreenUIPatching.renderTexture;
 
@@ -165,22 +209,6 @@ namespace MissileView.Patches
 
         }
 
-        private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
-        {
-            if (camera == currentMissileCamera)
-            {
-                RenderSettings.fog = false;
-            }
-        }
-
-        //// Token: 0x060010E3 RID: 4323 RVA: 0x00082E07 File Offset: 0x00081007
-        //private void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
-        //{
-        //    if (camera == this.cam)
-        //    {
-        //        RenderSettings.fog = true;
-        //    }
-        //}
 
         public static void ActivateMissile(int index)
         {
