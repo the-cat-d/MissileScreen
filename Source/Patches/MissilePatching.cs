@@ -2,6 +2,7 @@
 using MissileView.UI;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -14,7 +15,7 @@ namespace MissileView.Patches
         public static List<Missile> missiles = new();
         public static int currentMissileIndex = 0;
 
-
+        // TODO: gbmlr breaks for some reason
         internal class MiscMissilePatches
         {
             [HarmonyPatch(typeof(SubmunitionDispenser), "JettisonCasings")]
@@ -22,8 +23,15 @@ namespace MissileView.Patches
             {
                 static void Postfix(SubmunitionDispenser __instance)
                 {
-                    OnDetonate(__instance.gameObject.GetComponent<Missile>());
-
+                    
+                    try
+                    {
+                        OnDetonate(__instance.gameObject.GetComponent<Missile>());
+                    }
+                    catch (System.Exception error)
+                    {
+                        Plugin.Logger.LogError($"Error in MissilePatches.OnClusterDestroy: {error.Message}\nMissile: {__instance.gameObject.GetComponent<Missile>()}");
+                    }
                 }
 
             }
@@ -39,7 +47,13 @@ namespace MissileView.Patches
                 static void Postfix(Missile __instance)
                 {
 
-                    OnMissileStart(__instance);
+                   try
+                    {
+                        OnMissileStart(__instance);
+                    } catch (System.Exception error)
+                    {
+                        Plugin.Logger.LogError($"Error in MissilePatches.OnMissileLaunch: {error.Message}\nMissile: {__instance}");
+                    }
 
                 }
             }
@@ -50,8 +64,15 @@ namespace MissileView.Patches
             {
                 static void Postfix(Missile __instance)
                 {
-                    OnDetonate(__instance);
-
+                   
+                    try
+                    {
+                        OnDetonate(__instance);
+                    }
+                    catch (System.Exception error)
+                    {
+                        Plugin.Logger.LogError($"Error in MissilePatches.OnMissileDestroy: {error.Message}\nnMissile: {__instance}");
+                    }
                 }
 
             }
@@ -129,19 +150,19 @@ namespace MissileView.Patches
                 missileCam.fieldOfView = PluginConfig.cameraFOV.Value;
                 missileCam.transform.localPosition = PluginConfig.missileCameraOffset.Value;
                 missileCam.transform.rotation = Quaternion.Euler(missileCam.transform.rotation.eulerAngles.x, missileCam.transform.rotation.eulerAngles.y, GameUtils.getAircraft().transform.rotation.eulerAngles.z);
-                missileCam.GetComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
 
+                missileCam.GetComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
                 missileCam.GetComponent<UniversalAdditionalCameraData>().volumeLayerMask = 256;
 
-                // TODO: Remove AudioListener from missile cam
+                Component.Destroy(missileCam.GetComponent<AudioListener>());
 
-
+                
 
                 missileCam.targetTexture = MissileScreenUIPatching.renderTexture;
 
                 missileCam.gameObject.SetActive(true);
                 ProfileManager.currentProfile.screen.SetActive(true);
-
+           
                 ProfileManager.currentProfile.missileName.SetText(__instance.unitName);
 
                 missiles.Add(__instance);

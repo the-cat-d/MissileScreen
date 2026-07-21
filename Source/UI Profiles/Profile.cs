@@ -1,10 +1,5 @@
-﻿using MissileView.Patches;
-using System;
-using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
-using UnityEngine.UI;
-using Object = UnityEngine.Object;
+﻿using UnityEngine;
+
 
 namespace MissileView.UI
 {
@@ -30,12 +25,12 @@ namespace MissileView.UI
         public GameUtils.Draw.UILabel missileAltitude;
 
 
-        public GameObject velocityVector;
-        public GameObject orientationIndicator;
-        public GameObject lockBox;
-        public GameObject leadIcon;
+        public GameUtils.Draw.UIImage velocityVector;
+        public GameUtils.Draw.UIImage orientationIndicator;
+        public GameUtils.Draw.UIImage leadIcon;
 
- 
+        public GameObject lockBox;
+
 
         // Misc
 
@@ -57,7 +52,7 @@ namespace MissileView.UI
 
         public float LeftPanelPivotYOffset = 2.5f;
 
-        public float velocityVectorIconScale = 0.5f;
+        public float velocityVectorIconScale = 0.4f;
         public string ReplacePanelName = "weaponPanel";
         public int fontSize = 37;
         public float leadIconScale = 1;

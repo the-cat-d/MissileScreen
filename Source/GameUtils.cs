@@ -1,5 +1,4 @@
 ﻿
-using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -108,9 +107,9 @@ namespace MissileView
 
                 protected UIElement(
                     string name,
-                    Transform UIParent = null,
+                    Transform UIParent = null
 
-                    Material material = null)
+                    )
                 {
 
                     if (UIParent != null)
@@ -122,7 +121,6 @@ namespace MissileView
                                 gameObject = child.gameObject;
                                 rectTransform = gameObject.GetComponent<RectTransform>();
                                 imageComponent = gameObject.GetComponent<Image>();
-                                if (material != null) imageComponent.material = material;
                                 return;
                             }
                         }
@@ -131,8 +129,7 @@ namespace MissileView
                     gameObject = new GameObject(name);
                     gameObject.transform.SetParent(UIParent, false);
                     rectTransform = gameObject.AddComponent<RectTransform>();
-                    imageComponent = gameObject.AddComponent<Image>();
-                    if (material != null) imageComponent.material = material;
+                    
                     return;
                 }
 
@@ -150,6 +147,12 @@ namespace MissileView
                 {
                     imageComponent.color = color;
                 }
+
+                public void SetActive(bool active)
+                {
+                    gameObject.gameObject.SetActive(active);
+                }
+
 
 
                 public GameObject GetGameObject() => gameObject;
@@ -171,17 +174,23 @@ namespace MissileView
                     string name,
                     Vector2 position,
                     Transform UIParent = null,
-                    FontStyle fontStyle = FontStyle.Normal,
-                    Color? color = null,
+                    string text = "",
                     int fontSize = 24,
-                    float backgroundOpacity = 0.8f,
-                    Material material = null) : base(name, UIParent)
+                    TextAnchor fontAlignment = TextAnchor.MiddleLeft,
+                    Color? textColor = null
+    
+                    ) : base(name, UIParent)
                 {
-                    this.backgroundOpacity = backgroundOpacity;
+                    Plugin.Logger.LogDebug(name);
+                    imageComponent = gameObject.AddComponent<Image>();
+                    this.backgroundOpacity = 0.8f;
                     rectTransform.anchoredPosition = position;
                     rectTransform.sizeDelta = new Vector2(200, 40);
+                   
                     imageComponent.color = new Color(0, 0, 0, this.backgroundOpacity);
+                    
                     GameObject textObj = new("LabelText");
+                    
                     textObj.transform.SetParent(gameObject.transform, false);
                     RectTransform textRect = textObj.AddComponent<RectTransform>();
                     textRect.anchorMin = Vector2.zero;
@@ -191,23 +200,31 @@ namespace MissileView
                     Text textComp = textObj.AddComponent<Text>();
                     textComp.font = GameUtils.Draw.GetDefaultFont();
                     textComp.fontSize = fontSize;
-                    textComp.fontStyle = fontStyle;
-                    textComp.color = color ?? Color.white;
-
-                    textComp.alignment = TextAnchor.MiddleCenter;
-                    textComp.text = "";
+                    textComp.fontStyle = FontStyle.Normal;
+                    textComp.color = textColor ?? Color.white;
+                   
+                    textComp.alignment = fontAlignment;
+                    textComp.text = text;
                     textComp.horizontalOverflow = HorizontalWrapMode.Overflow;
                     textComp.verticalOverflow = VerticalWrapMode.Overflow;
                     rectTransform.sizeDelta = new Vector2(textComp.preferredWidth, textComp.fontSize);
-                    Transform textTransform = gameObject.transform.Find("LabelText");
-                    textComponent = textTransform.GetComponent<Text>();
-                    if (material != null)
-                    {
-                        textComponent.material = material;
-                    }
-                    return;
+                    //Transform textTransform = gameObject.transform.Find("LabelText");
+                    textComponent = textComp;
+                    //if (material != null)
+                    //{
+                    //    textComponent.material = material;
+                    //}
+                    Plugin.Logger.LogDebug(name + "2");
+                   
                 }
 
+                public void SetAnchorPivot(Vector2 anchorMin,Vector2 anchorMax,Vector2 pivot)
+                {
+                    rectTransform.anchorMin = anchorMin;
+                    rectTransform.anchorMax = anchorMax;
+                    rectTransform.pivot = pivot;
+                }
+                
                 public void SetText(string text)
                 {
                     textComponent.text = text;
@@ -231,11 +248,7 @@ namespace MissileView
                     textComponent.alignment = alignment;
                 }
 
-                public void SetActive(bool active)
-                {
-                   gameObject.gameObject.SetActive(active);
-                }
-
+               
 
                 public Vector2 GetTextSize()
                 {
@@ -244,6 +257,47 @@ namespace MissileView
 
             }
 
+
+            public class UIImage : UIElement
+            {
+                private Image iconComponent;
+                public UIImage(
+                    string name,
+                    Transform UIParent,
+                    Sprite sprite,
+                    Color imageColor,
+                    Vector2? imageScale,
+                    Color? outlineColor,
+                    Vector2? outlineThickness,
+                    bool createOutline = false
+
+                    ) : base(name,UIParent)
+                {
+                    iconComponent = gameObject.AddComponent<Image>();
+                    iconComponent.transform.parent = UIParent;
+                    gameObject.transform.localPosition = Vector3.zero;
+                    gameObject.transform.localRotation = Quaternion.identity;
+                    gameObject.transform.localScale = imageScale ?? new Vector2(1, 1);
+                    
+
+                    iconComponent.sprite = sprite;
+                    iconComponent.color = imageColor;
+
+                    if (createOutline)
+                    {
+                        Outline imageOutline = gameObject.AddComponent<Outline>();
+                        imageOutline.effectColor = outlineColor ?? Color.white;
+                        imageOutline.effectDistance = outlineThickness ?? new(1,1);
+                    }
+
+                   
+                }
+
+                public void ChangeImageColor(Color newColor)
+                {
+                    iconComponent.color = newColor;
+                }
+            }
          
             public static Font GetDefaultFont()
             {

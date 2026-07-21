@@ -16,8 +16,8 @@ namespace MissileView.UI_Profiles.AircraftProfiles
                 fontSize = 47,
 
                 lockboxCornerScale = 0.6f,
-                lockboxMinSize = 60,
-                velocityVectorIconScale = 0.7f,
+                lockboxMinSize = 63,
+                velocityVectorIconScale = 0.6f,
                 leadIconScale = 1.2f,
 
         

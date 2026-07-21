@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using MissileView.UI;
-using System.Reflection;
 using UnityEngine;
 
 
@@ -90,7 +89,7 @@ namespace MissileView.Patches
         {
             if (isPlaneCompatible == true)
             {
-                int lockboxMinSize = ProfileManager.currentProfile.lockboxMinSize;
+                
 
                 if (Input.GetKeyDown(PluginConfig.cycleKey.Value))
                 {
@@ -105,15 +104,18 @@ namespace MissileView.Patches
                     if (MissilePatching.missiles[MissilePatching.currentMissileIndex] != null)
                     {
 
-                       
+
                         Missile currentMissile = MissilePatching.missiles[MissilePatching.currentMissileIndex];
 
                         Camera missileCam = currentMissile.transform.GetComponentInChildren<Camera>(true);
 
-                        
+
+
 
                         if (missileCam != null)
                         {
+                            int lockboxMinSize = ProfileManager.currentProfile.lockboxMinSize;
+
                             Vector3 screenCenter = new Vector3(missilePanelSize.x / 2, missilePanelSize.y / 2, 0);
                             ProfileManager.currentProfile.ToggleElements(true);
 
@@ -132,7 +134,7 @@ namespace MissileView.Patches
                             if (target != null)
                             {
                                 targetPosition = target.transform.position;
-                                renderer = target.gameObject.GetComponentInChildren<Renderer>();
+                                renderer = target.gameObject.GetComponentInChildren<Renderer>(); 
                             }
                             else
                             {
@@ -189,11 +191,6 @@ namespace MissileView.Patches
 
 
 
-
-
-
-
-
                                 rect.sizeDelta = new Vector2(
                                    Mathf.Max(size.x, lockboxMinSize),
                                    Mathf.Max(size.y, lockboxMinSize)
@@ -247,13 +244,13 @@ namespace MissileView.Patches
 
 
 
-                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, missilePanelSize, ProfileManager.currentProfile.leadIcon.GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.leadIconThing);
+                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, missilePanelSize, ProfileManager.currentProfile.leadIcon.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.leadIconThing);
 
-                                    ProfileManager.currentProfile.leadIcon.transform.localPosition = leadUiPos;
+                                    ProfileManager.currentProfile.leadIcon.GetGameObject().transform.localPosition = leadUiPos;
                                 } else
                                 {
                                    
-                                    ProfileManager.currentProfile.leadIcon.transform.localPosition = uiPos;
+                                    ProfileManager.currentProfile.leadIcon.GetGameObject().transform.localPosition = uiPos;
                                 }
                             }
                             else
@@ -278,12 +275,12 @@ namespace MissileView.Patches
                             // Velocity Vector
                             Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;
                             Vector3 vector = Vector3.Scale(missileCam.WorldToScreenPoint(position), new Vector3(1f, 1f, 0f)) - screenCenter;
-                            vector = GameUtils.ClampToScreen(vector, missilePanelSize, ProfileManager.currentProfile.velocityVector.GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.velocityVectorThing);
-                            ProfileManager.currentProfile.velocityVector.transform.localPosition = vector;
+                            vector = GameUtils.ClampToScreen(vector, missilePanelSize, ProfileManager.currentProfile.velocityVector.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.velocityVectorThing);
+                            ProfileManager.currentProfile.velocityVector.GetGameObject().transform.localPosition = vector;
 
                             // Orientation Indicator
 
-                            ProfileManager.currentProfile.orientationIndicator.transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
+                            ProfileManager.currentProfile.orientationIndicator.GetGameObject().transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
 
 
 

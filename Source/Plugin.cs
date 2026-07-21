@@ -145,7 +145,7 @@ namespace MissileView
             PluginConfig.lockBoxOutlineColor = Config.Bind("UI Config", "Target Lockbox Outline Color", Color.black, "The outline color of the target lockbox corners in the missile screen. Changes are applied when changing aircraft.");
             PluginConfig.lockBoxOutlineThickness = Config.Bind("UI Config", "Target Lockbox Outline Thickness", 1f, "The thickness of the outline of the target lockbox corners in the missile screen. Changes are applied when changing aircraft.");
 
-
+            
             // TODO: fixed size lockbox option for performance
 
             // Misc Config
