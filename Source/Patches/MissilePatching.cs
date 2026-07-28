@@ -2,7 +2,6 @@
 using MissileView.UI;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -14,8 +13,9 @@ namespace MissileView.Patches
 
         public static List<Missile> missiles = new();
         public static int currentMissileIndex = 0;
+        static public Camera currentMissileCamera = null;
 
-        // TODO: gbmlr breaks for some reason
+        
         internal class MiscMissilePatches
         {
             [HarmonyPatch(typeof(SubmunitionDispenser), "JettisonCasings")]
@@ -52,7 +52,7 @@ namespace MissileView.Patches
                         OnMissileStart(__instance);
                     } catch (System.Exception error)
                     {
-                        Plugin.Logger.LogError($"Error in MissilePatches.OnMissileLaunch: {error.Message}\nMissile: {__instance}");
+                        Plugin.Logger.LogError($"Missile Launch Error ({__instance.unitName}): {error.Message}{error.StackTrace}");
                     }
 
                 }
@@ -71,7 +71,7 @@ namespace MissileView.Patches
                     }
                     catch (System.Exception error)
                     {
-                        Plugin.Logger.LogError($"Error in MissilePatches.OnMissileDestroy: {error.Message}\nnMissile: {__instance}");
+                        Plugin.Logger.LogError($"Missile Detonation Error ({__instance.unitName}): {error.Message}{error.StackTrace}");
                     }
                 }
 
@@ -113,7 +113,7 @@ namespace MissileView.Patches
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        static public Camera currentMissileCamera = null;
+       
 
         private static void OnMissileStart(Missile __instance)
         {
@@ -150,6 +150,13 @@ namespace MissileView.Patches
                 missileCam.fieldOfView = PluginConfig.cameraFOV.Value;
                 missileCam.transform.localPosition = PluginConfig.missileCameraOffset.Value;
                 missileCam.transform.rotation = Quaternion.Euler(missileCam.transform.rotation.eulerAngles.x, missileCam.transform.rotation.eulerAngles.y, GameUtils.getAircraft().transform.rotation.eulerAngles.z);
+
+                UniversalAdditionalCameraData missileCamData;
+
+                if (!missileCam.TryGetComponent<UniversalAdditionalCameraData>(out missileCamData))
+                {
+                    missileCam.gameObject.AddComponent<UniversalAdditionalCameraData>();
+                } 
 
                 missileCam.GetComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
                 missileCam.GetComponent<UniversalAdditionalCameraData>().volumeLayerMask = 256;
@@ -252,6 +259,7 @@ namespace MissileView.Patches
 
         public static void CycleMissileView()
         {
+           
             Plugin.Logger.LogDebug($"count:{missiles.Count}, index: {currentMissileIndex}");
             if (currentMissileIndex >= 0 && currentMissileIndex < missiles.Count)
             {

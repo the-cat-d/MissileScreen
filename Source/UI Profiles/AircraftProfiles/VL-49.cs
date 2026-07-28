@@ -19,8 +19,10 @@ namespace MissileView.UI_Profiles.AircraftProfiles
 
 
 
-                LeftPanelPivotYOffset = 2.52f,
-                RightPanelPivotYOffset = 2.25f
+                //LeftPanelPivotYOffset = 2.42f,
+                //RightPanelPivotYOffset = 2.4f,
+
+                hideGameObjectNames = ["BasicFlightInstrument", "wingAngleGauge"],
 
 
             }, nameof(QuadVTOL1));

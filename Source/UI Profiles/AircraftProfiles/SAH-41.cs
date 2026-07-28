@@ -20,8 +20,10 @@ namespace MissileView.UI_Profiles.AircraftProfiles
                 lockboxMinSize = 42,
                 fontSize = 24,
 
-                //missilePanelRectSize = new(160, 220),
-                //missilePanelRectPosition = new(407, 25.5f)
+                LeftPanelPivotYOffset = 2.6f,
+                RightPanelPivotYOffset = 2.3f,
+
+           
             }, nameof(AttackHelo1));
         }
 
