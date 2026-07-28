@@ -1,4 +1,5 @@
-﻿using MissileView.Patches;
+﻿using HarmonyLib;
+using MissileView.Patches;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,12 +89,9 @@ namespace MissileView.UI
 
             MissileScreenUIPatching.isPlaneCompatible = true;
 
-           
+            
 
-            //if (profile.weaponPanel.GetComponent<HorizontalOrVerticalLayoutGroup>() != null)
-            //{
-            //    UnityEngine.Object.Destroy(profile.weaponPanel.GetComponent<HorizontalOrVerticalLayoutGroup>());
-            //}
+
 
             //// Missile Panel Creation \\\\
 
@@ -101,10 +99,10 @@ namespace MissileView.UI
 
             profile.missilePanel = UnityEngine.Object.Instantiate(profile.weaponPanel, profile.weaponPanel.transform.parent);
             profile.missilePanel.name = "missilePanel";
-            MissileScreenUIPatching.missilePanelSize = profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
+            
 
 
-            // Clear Missile Panel Children (if any)
+            // Clear Missile Panel Children
 
             foreach (Transform child in profile.missilePanel)
             {
@@ -112,13 +110,13 @@ namespace MissileView.UI
             }
 
 
-            // Clear Missile Panel Components (if any)
-            // TODO: finish this (clear all other components besides things such as transform)
+            // Clear Missile Panel Components (besides RectTransform and CanvasRenderer)
+
             Component[] panelComponents = profile.missilePanel.GetComponents<Component>();
 
             foreach (Component component in panelComponents)
             {
-                if ((component is Image) || (component is Text) || (component is RawImage) || (component is GridLayoutGroup) || (component is SystemStatusDisplay) || (component is HorizontalOrVerticalLayoutGroup)) {
+                if (!(component is RectTransform) && !(component is CanvasRenderer)) {
                     Component.Destroy(component);
                 }
             }
@@ -130,7 +128,22 @@ namespace MissileView.UI
                 profile.weaponPanel.gameObject.SetActive(true);
             }
 
-
+            // Getting hideGameObject (if the profile is set to do so)
+            
+            if (profile.hideGameObjectNames.Count > 0)
+            {
+                for (int i = 0; i < profile.hideGameObjectNames.Count; i++)
+                {
+                    Transform hideGameObject = GameUtils.FindChildRecursive(tacScreenInstance.transform, profile.hideGameObjectNames[i]);
+                    if (hideGameObject != null)
+                    {
+                       profile.hideGameObjects.Add(hideGameObject.gameObject);
+                        
+                    }
+                }
+                
+            }
+         
 
 
             //// Panel Configuration \\\\
@@ -145,16 +158,18 @@ namespace MissileView.UI
             // Missile Panel Rotation
             profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile.rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
 
-            // Hierarchy - currently unused, keeping it just incase if i need it
-            //profile.missilePanel.SetSiblingIndex(profile.hierachyOrder != -1 ? profile.hierachyOrder : profile.missilePanel.GetSiblingIndex());
+            //Hierarchy - currently unused, keeping it just incase if i need it
 
+            profile.missilePanel.SetSiblingIndex(profile.hierachyOrder != -1 ? profile.hierachyOrder : profile.missilePanel.GetSiblingIndex());
+
+            profile.missilePanelSize = profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
 
             //// Panel Creation \\\\
 
 
             // Screen
 
-            MissileScreenUIPatching.renderTexture = new((int)MissileScreenUIPatching.missilePanelSize.x, (int)MissileScreenUIPatching.missilePanelSize.y, 16, RenderTextureFormat.ARGB32);
+            MissileScreenUIPatching.renderTexture = new((int)profile.missilePanelSize.x, (int)profile.missilePanelSize.y, 16, RenderTextureFormat.ARGB32);
 
             profile.screen = new("missileScreen");
             profile.screen.transform.parent = profile.missilePanel;

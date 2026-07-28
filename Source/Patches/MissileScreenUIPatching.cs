@@ -12,7 +12,7 @@ namespace MissileView.Patches
 
         public static RenderTexture renderTexture;
 
-        public static Vector2 missilePanelSize;
+        //public static Vector2 missilePanelSize;
 
 
         public static bool isPlaneCompatible = false;
@@ -20,60 +20,95 @@ namespace MissileView.Patches
 
         //// Patches \\\\
 
-        // Runs pretty much when the player enters the aircraft
-        // All the UI related work from the mod is done in this patch
-        [HarmonyPatch(typeof(TacScreen), "Initialize")]
-        public class TacScreenInit
+        
+        public class MissileScreenUIPatches
         {
+            private const float errorFrequency = 3;
+            private static int errCount;
 
-            static void Postfix(TacScreen __instance, Aircraft aircraft, Cockpit cockpit)
+            // Runs when the player enters the aircraft
+            // All the UI related work from the mod is done in this patch
+            [HarmonyPatch(typeof(TacScreen), "Initialize")]
+            public class TacScreenInit
             {
-                var playerAircraft = GameUtils.getAircraft();
-                if (aircraft == null || playerAircraft == null || aircraft != playerAircraft) return;
 
-                try
+                static void Postfix(TacScreen __instance, Aircraft aircraft, Cockpit cockpit)
                 {
-                    isPlaneCompatible = false;
+                    var playerAircraft = GameUtils.getAircraft();
+                    if (aircraft == null || playerAircraft == null || aircraft != playerAircraft) return;
+
+                    try
+                    {
+                        isPlaneCompatible = false;
 
 
+                        // Create Missile Screen UI
 
-                    ProfileManager.InjectProfileUI(aircraft.definition.name, __instance);
+                        ProfileManager.InjectProfileUI(aircraft.definition.name, __instance);
 
 
-                    // Clear missile data on start up
+                        // Clear missile data on start up
 
-                    MissilePatching.currentMissileIndex = 0;
-                    MissilePatching.missiles.Clear();
+                        MissilePatching.currentMissileIndex = 0;
+                        MissilePatching.missiles.Clear();
 
-                    Plugin.Logger.LogDebug("Loaded TacScreen");
+                        Plugin.Logger.LogDebug("Loaded TacScreen");
+
+                    }
+                    catch (System.Exception error)
+                    {
+                        Plugin.Logger.LogError($"Failed to inject UI ({aircraft.definition.name}): {error.Message}\n{error.StackTrace}");
+                    }
+
+
 
                 }
-                catch (System.Exception error)
-                {
-                    Plugin.Logger.LogError($"Failed to inject UI: {error.Message}");
-                }
-
 
 
             }
 
 
-        }
 
-
-
-        
-
-        // The main update function of the mod
-        // i used this because i only want to run whenever the player is in an aircraft and because the TacScreen 
-        // component only exists for the player whenever in a cockpit.
-        [HarmonyPatch(typeof(TacScreen), "Update")]
-        public class TacScreenUpdate
-        {
-
-            static void Postfix()
+            // The main update function of the mod
+            // i only want to run whenever the player is in an aircraft and because the TacScreen 
+            // component only exists for the player whenever in a cockpit.
+            [HarmonyPatch(typeof(TacScreen), "Update")]
+            public class TacScreenUpdate
             {
-                Update();
+
+                private static float timeSinceErr = 0;
+                
+
+                static void Postfix(TacScreen __instance)
+                {
+
+                    try
+                    {
+
+                        Update();
+                        
+                        timeSinceErr = 0;
+                        errCount = 0;
+
+                    } catch (System.Exception error)
+                    {
+                        errCount += 1;
+                        timeSinceErr -= Time.deltaTime;
+
+                        if (timeSinceErr <= 0)
+                        {
+
+                            string finalErrCount = errCount > 1 ? "x" + errCount : "";
+
+                            Plugin.Logger.LogError($"Missile Screen Update Failure {finalErrCount} ({__instance.aircraft.definition.name}): {error.Message}{error.StackTrace}");
+                            
+
+                            timeSinceErr = errorFrequency;
+                        }
+
+                    }
+
+                }
             }
         }
 
@@ -95,7 +130,7 @@ namespace MissileView.Patches
                 {
 
                     MissilePatching.CycleMissileView();
-
+                    
                 }
 
 
@@ -116,10 +151,12 @@ namespace MissileView.Patches
                         {
                             int lockboxMinSize = ProfileManager.currentProfile.lockboxMinSize;
 
-                            Vector3 screenCenter = new Vector3(missilePanelSize.x / 2, missilePanelSize.y / 2, 0);
+                            
+
+                            Vector3 screenCenter =  new Vector3(ProfileManager.currentProfile.missilePanelSize.x / 2, ProfileManager.currentProfile.missilePanelSize.y / 2, 0);
                             ProfileManager.currentProfile.ToggleElements(true);
 
-
+                            
                             // Target Box (Size)
 
                             Vector2 minLockbox = new Vector2(lockboxMinSize, lockboxMinSize);
@@ -210,7 +247,7 @@ namespace MissileView.Patches
 
                             Vector3 uiPos = Vector3.Scale(viewportTargetPosition, new Vector3(1, 1, 0)) - screenCenter;
 
-                            uiPos = GameUtils.ClampToScreen(uiPos, missilePanelSize,lockboxSize);
+                            uiPos = GameUtils.ClampToScreen(uiPos, ProfileManager.currentProfile.missilePanelSize, lockboxSize);
 
 
 
@@ -244,7 +281,7 @@ namespace MissileView.Patches
 
 
 
-                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, missilePanelSize, ProfileManager.currentProfile.leadIcon.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.leadIconThing);
+                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, ProfileManager.currentProfile.missilePanelSize, ProfileManager.currentProfile.leadIcon.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.leadIconThing);
 
                                     ProfileManager.currentProfile.leadIcon.GetGameObject().transform.localPosition = leadUiPos;
                                 } else
@@ -274,8 +311,10 @@ namespace MissileView.Patches
 
                             // Velocity Vector
                             Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;
+                         
+
                             Vector3 vector = Vector3.Scale(missileCam.WorldToScreenPoint(position), new Vector3(1f, 1f, 0f)) - screenCenter;
-                            vector = GameUtils.ClampToScreen(vector, missilePanelSize, ProfileManager.currentProfile.velocityVector.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.velocityVectorThing);
+                            vector = GameUtils.ClampToScreen(vector, ProfileManager.currentProfile.missilePanelSize, ProfileManager.currentProfile.velocityVector.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.velocityVectorThing);
                             ProfileManager.currentProfile.velocityVector.GetGameObject().transform.localPosition = vector;
 
                             // Orientation Indicator

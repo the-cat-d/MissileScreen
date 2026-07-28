@@ -15,12 +15,13 @@ namespace MissileView.UI_Profiles.AircraftProfiles
 
                 fontSize = 47,
 
-                lockboxCornerScale = 0.6f,
-                lockboxMinSize = 63,
-                velocityVectorIconScale = 0.6f,
-                leadIconScale = 1.2f,
+                lockboxCornerScale = 0.5f,
+                lockboxMinSize = 70,
+                velocityVectorIconScale = 0.4f,
+                leadIconScale = 1.3f,
 
-        
+                LeftPanelPivotYOffset = 2.45f,
+                RightPanelPivotYOffset = 2.15f,
 
 
             }, nameof(Multirole1));

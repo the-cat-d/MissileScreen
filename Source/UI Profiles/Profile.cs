@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using MissileView.Source;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 
 namespace MissileView.UI
@@ -16,18 +19,18 @@ namespace MissileView.UI
         // UI
 
         public GameObject screen;
+        
+        public UIDraw.UILabel missileName;
+        public UIDraw.UILabel missileTargetName;
+        public UIDraw.UILabel missileIndex;
+        public UIDraw.UILabel missileSpeed;
+        public UIDraw.UILabel missileRange;
+        public UIDraw.UILabel missileAltitude;
 
-        public GameUtils.Draw.UILabel missileName;
-        public GameUtils.Draw.UILabel missileTargetName;
-        public GameUtils.Draw.UILabel missileIndex;
-        public GameUtils.Draw.UILabel missileSpeed;
-        public GameUtils.Draw.UILabel missileRange;
-        public GameUtils.Draw.UILabel missileAltitude;
 
-
-        public GameUtils.Draw.UIImage velocityVector;
-        public GameUtils.Draw.UIImage orientationIndicator;
-        public GameUtils.Draw.UIImage leadIcon;
+        public UIDraw.UIImage velocityVector;
+        public UIDraw.UIImage orientationIndicator;
+        public UIDraw.UIImage leadIcon;
 
         public GameObject lockBox;
 
@@ -38,7 +41,10 @@ namespace MissileView.UI
         public Transform weaponPanel;
         public Transform missilePanel;
 
+        public Vector2 missilePanelSize;
 
+        // Hides a specfic game object from the Tacscreen when the missile is active.
+        public List<GameObject> hideGameObjects = new List<GameObject>();
 
 
         // Unique Aircraft Config
@@ -65,6 +71,8 @@ namespace MissileView.UI
         public float leadIconThing = 2;
 
        
+        // Hides specfic game objects from the TacScreen when a missile is active.
+        public List<string> hideGameObjectNames = new List<string>();
 
         public void ToggleElements(bool active)
         {
@@ -78,6 +86,14 @@ namespace MissileView.UI
             missileAltitude.SetActive(active);
             missileTargetName.SetActive(active);
 
+            if (hideGameObjects.Count > 0)
+            {
+                foreach (var go in hideGameObjects)
+                {
+                    go.SetActive(!active);
+                }
+            }
+
 
         }
 
@@ -88,6 +104,14 @@ namespace MissileView.UI
             missileIndex.SetActive(false);
             velocityVector.SetActive(false);
             screen.SetActive(false);
+
+            if (hideGameObjects.Count > 0)
+            {
+                foreach (var go in hideGameObjects)
+                {
+                    go.SetActive(true);
+                }
+            }
         }
 
        

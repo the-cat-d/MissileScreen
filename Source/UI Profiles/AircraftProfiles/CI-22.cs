@@ -19,7 +19,12 @@ namespace MissileView.UI_Profiles.AircraftProfiles
                 fontSize = 24,
 
                 missilePanelRectSize = new(160, 220),
-                missilePanelRectPosition = new(407, 25.5f)
+                missilePanelRectPosition = new(407, 25.5f),
+                velocityVectorIconScale = 0.3f,
+
+                LeftPanelPivotYOffset = 2.6f,
+                RightPanelPivotYOffset = 2.3f,
+
             }, "CI-22");
         }
 
