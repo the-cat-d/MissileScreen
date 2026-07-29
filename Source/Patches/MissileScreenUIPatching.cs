@@ -118,229 +118,239 @@ namespace MissileView.Patches
         //// Functions \\\\
 
 
-
+        private static Vector3 lastTargetPos;
 
         private static void Update()
         {
-            if (isPlaneCompatible == true)
+            if (isPlaneCompatible == false) return;
+           
+
+            if (Input.GetKeyDown(PluginConfig.cycleKey.Value))
             {
-                
 
-                if (Input.GetKeyDown(PluginConfig.cycleKey.Value))
+                MissilePatching.CycleMissileView();
+
+            }
+
+
+            if (MissilePatching.missiles.Count > 0 && MissilePatching.currentMissileIndex < MissilePatching.missiles.Count)
+            {
+                if (MissilePatching.missiles[MissilePatching.currentMissileIndex] != null)
                 {
 
-                    MissilePatching.CycleMissileView();
-                    
-                }
+                    Missile currentMissile = MissilePatching.missiles[MissilePatching.currentMissileIndex];
+
+                    Camera missileCam = currentMissile.transform.GetComponentInChildren<Camera>(true);
 
 
-                if (MissilePatching.missiles.Count > 0 && MissilePatching.currentMissileIndex < MissilePatching.missiles.Count)
-                {
-                    if (MissilePatching.missiles[MissilePatching.currentMissileIndex] != null)
+                    if (missileCam != null)
                     {
-
-
-                        Missile currentMissile = MissilePatching.missiles[MissilePatching.currentMissileIndex];
-
-                        Camera missileCam = currentMissile.transform.GetComponentInChildren<Camera>(true);
+                        int lockboxMinSize = ProfileManager.currentProfile.lockboxMinSize;
 
 
 
+                        Vector3 screenCenter = new Vector3(ProfileManager.currentProfile.missilePanelSize.x / 2, ProfileManager.currentProfile.missilePanelSize.y / 2, 0);
+                        ProfileManager.currentProfile.ToggleElements(true);
 
-                        if (missileCam != null)
+
+                        // Target Box (Size)
+
+                        Vector2 minLockbox = new Vector2(lockboxMinSize, lockboxMinSize);
+
+                        Renderer targetRenderer;
+
+                        Unit target = currentMissile.target;
+                        Vector3 targetPosition;
+
+
+
+                        if (target != null)
                         {
-                            int lockboxMinSize = ProfileManager.currentProfile.lockboxMinSize;
-
-                            
-
-                            Vector3 screenCenter =  new Vector3(ProfileManager.currentProfile.missilePanelSize.x / 2, ProfileManager.currentProfile.missilePanelSize.y / 2, 0);
-                            ProfileManager.currentProfile.ToggleElements(true);
-
-                            
-                            // Target Box (Size)
-
-                            Vector2 minLockbox = new Vector2(lockboxMinSize, lockboxMinSize);
-
-                            Renderer renderer;
-
-                            Unit target = currentMissile.target;
-                            Vector3 targetPosition;
-
-
-
-                            if (target != null)
-                            {
-                                targetPosition = target.transform.position;
-                                renderer = target.gameObject.GetComponentInChildren<Renderer>(); 
-                            }
-                            else
-                            {
-                                var aimPoint = Traverse.Create(currentMissile).Field("aimPoint").GetValue<GlobalPosition>();
-                                targetPosition = aimPoint.ToLocalPosition();
-                                renderer = null;
-                                ProfileManager.currentProfile.lockBox.SetActive(false);
-                            }
-                            Vector3 viewportTargetPosition = missileCam.WorldToScreenPoint(targetPosition);
-
-
-                            Vector2 lockboxSize = minLockbox;
-
-
-                            
-
-                            RectTransform rect = ProfileManager.currentProfile.lockBox.GetComponent<RectTransform>();
-                            if (renderer != null && PluginConfig.fixedLockBox.Value == false)
-                            {
-                                Bounds bounds = renderer.bounds;
-                               
-                                Vector3[] corners = new Vector3[8];
-
-                                Vector3 min = bounds.min;
-                                Vector3 max = bounds.max;
-
-                                corners[0] = new Vector3(min.x, min.y, min.z);
-                                corners[1] = new Vector3(max.x, min.y, min.z);
-                                corners[2] = new Vector3(min.x, max.y, min.z);
-                                corners[3] = new Vector3(max.x, max.y, min.z);
-
-                                corners[4] = new Vector3(min.x, min.y, max.z);
-                                corners[5] = new Vector3(max.x, min.y, max.z);
-                                corners[6] = new Vector3(min.x, max.y, max.z);
-                                corners[7] = new Vector3(max.x, max.y, max.z);
-
-                                Vector3 minScreen = new Vector3(float.MaxValue, float.MaxValue, 0);
-                                Vector3 maxScreen = new Vector3(float.MinValue, float.MinValue, 0);
-
-                                foreach (var corner in corners)
-                                {
-                                    Vector3 screenPoint = missileCam.WorldToScreenPoint(corner);
-
-                                    //Ignore points behind camera
-                                    if (screenPoint.z < 0)
-                                        continue;
-
-                                    minScreen = Vector3.Min(minScreen, screenPoint);
-                                    maxScreen = Vector3.Max(maxScreen, screenPoint);
-                                }
-
-                                Vector3 center = (minScreen + maxScreen) / 2f;
-                                Vector3 size = maxScreen - minScreen;
-
-
-
-                                rect.sizeDelta = new Vector2(
-                                   Mathf.Max(size.x, lockboxMinSize),
-                                   Mathf.Max(size.y, lockboxMinSize)
-                                );
-                                lockboxSize = rect.sizeDelta;
-
-                            }
-                            else if (rect.sizeDelta != minLockbox)
-                            {
-                                
-
-                                rect.sizeDelta = new Vector2(lockboxMinSize, lockboxMinSize);
-                                lockboxSize = rect.sizeDelta;
-                            }
-
-                            // Position
-
-                            Vector3 uiPos = Vector3.Scale(viewportTargetPosition, new Vector3(1, 1, 0)) - screenCenter;
-
-                            uiPos = GameUtils.ClampToScreen(uiPos, ProfileManager.currentProfile.missilePanelSize, lockboxSize);
-
-
-
-                            ProfileManager.currentProfile.lockBox.transform.localPosition = uiPos;
-
-
-                            if (target != null)
-                            {
-                                if (target.NetworkHQ == null)
-                                {
-                                    ProfileManager.currentProfile.missileTargetName.SetColor(Color.white);
-                                }
-                                else
-                                {
-                                    ProfileManager.currentProfile.missileTargetName.SetColor(target.NetworkHQ == GameUtils.getHQ() ? GameAssets.i.HUDFriendly : GameAssets.i.HUDHostile);
-                                }
-
-                                ProfileManager.currentProfile.missileTargetName.SetText(target is Aircraft ? target.definition.unitName : target.unitName);
-
-                                float targetDistance = FastMath.Distance(targetPosition.ToGlobalPosition(), currentMissile.transform.GlobalPosition());
-
-                                ProfileManager.currentProfile.missileRange.SetText($"RNG {UnitConverter.DistanceReading(targetDistance)}");
-
-                                if (target.GetComponent<Rigidbody>() != null)
-                                {
-                                    Vector3 targetVelocity = target.rb.velocity;
-
-                                    Vector3 predictedPosition = targetPosition + targetVelocity * (targetDistance / currentMissile.rb.velocity.magnitude);
-
-                                    Vector3 leadUiPos = Vector3.Scale(missileCam.WorldToScreenPoint(predictedPosition) - screenCenter, new(1, 1, 0));
-
-
-
-                                    leadUiPos = GameUtils.ClampToScreen(leadUiPos, ProfileManager.currentProfile.missilePanelSize, ProfileManager.currentProfile.leadIcon.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.leadIconThing);
-
-                                    ProfileManager.currentProfile.leadIcon.GetGameObject().transform.localPosition = leadUiPos;
-                                } else
-                                {
-                                   
-                                    ProfileManager.currentProfile.leadIcon.GetGameObject().transform.localPosition = uiPos;
-                                }
-                            }
-                            else
-                            {
-                                ProfileManager.currentProfile.missileTargetName.SetColor(Color.white);
-                                ProfileManager.currentProfile.missileTargetName.SetText("No Target");
-                                ProfileManager.currentProfile.missileRange.SetText("RNG --");
-                                ProfileManager.currentProfile.leadIcon.SetActive(false);
-
-                            }
-
-                            currentMissile.UpdateRadarAlt();
-
-                            ProfileManager.currentProfile.missileIndex.SetText($"{MissilePatching.currentMissileIndex + 1}/{MissilePatching.missiles.Count}");
-                            ProfileManager.currentProfile.missileSpeed.SetText($"SPD {UnitConverter.SpeedReading(Mathf.Round(currentMissile.speed))}");
-                            ProfileManager.currentProfile.missileAltitude.SetText($"ALT {UnitConverter.AltitudeReading(currentMissile.radarAlt)}");
-
-                          
-
-                      
-
-                            // Velocity Vector
-                            Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;
-                         
-
-                            Vector3 vector = Vector3.Scale(missileCam.WorldToScreenPoint(position), new Vector3(1f, 1f, 0f)) - screenCenter;
-                            vector = GameUtils.ClampToScreen(vector, ProfileManager.currentProfile.missilePanelSize, ProfileManager.currentProfile.velocityVector.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.velocityVectorThing);
-                            ProfileManager.currentProfile.velocityVector.GetGameObject().transform.localPosition = vector;
-
-                            // Orientation Indicator
-
-                            ProfileManager.currentProfile.orientationIndicator.GetGameObject().transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
-
-
-
-                            
+                            targetPosition = target.transform.position;
+                            targetRenderer = target.gameObject.GetComponentInChildren<Renderer>();
+                        }
+                        else
+                        {
+                            var aimPoint = currentMissile.aimPoint;
+                            targetPosition = aimPoint.ToLocalPosition();
+                            targetRenderer = null;
+                            ProfileManager.currentProfile.lockBox.SetActive(false);
                         }
 
-                     
+                        Vector3 viewportTargetPosition = missileCam.WorldToScreenPoint(targetPosition);
+
+
+                        Vector2 lockboxSize = minLockbox;
+
+
+
+
+                        RectTransform lockBoxRect = ProfileManager.currentProfile.lockBox.GetComponent<RectTransform>();
+                        if (targetRenderer != null && PluginConfig.fixedLockBox.Value == false)
+                        {
+                            Bounds targetBounds = targetRenderer.bounds;
+
+                            Vector3[] corners = new Vector3[8];
+
+                            Vector3 min = targetBounds.min;
+                            Vector3 max = targetBounds.max;
+
+                            corners[0] = new Vector3(min.x, min.y, min.z);
+                            corners[1] = new Vector3(max.x, min.y, min.z);
+                            corners[2] = new Vector3(min.x, max.y, min.z);
+                            corners[3] = new Vector3(max.x, max.y, min.z);
+
+                            corners[4] = new Vector3(min.x, min.y, max.z);
+                            corners[5] = new Vector3(max.x, min.y, max.z);
+                            corners[6] = new Vector3(min.x, max.y, max.z);
+                            corners[7] = new Vector3(max.x, max.y, max.z);
+
+                            Vector3 minScreen = new Vector3(float.MaxValue, float.MaxValue, 0);
+                            Vector3 maxScreen = new Vector3(float.MinValue, float.MinValue, 0);
+
+                            foreach (var corner in corners)
+                            {
+                                Vector3 screenPoint = missileCam.WorldToScreenPoint(corner);
+
+                                
+                                if (screenPoint.z < 0)
+                                    continue;
+
+                                minScreen = Vector3.Min(minScreen, screenPoint);
+                                maxScreen = Vector3.Max(maxScreen, screenPoint);
+                            }
+
+                            Vector3 center = (minScreen + maxScreen) / 2f;
+                            Vector3 size = maxScreen - minScreen;
+
+
+
+                            lockBoxRect.sizeDelta = new Vector2(
+                               Mathf.Max(size.x, lockboxMinSize),
+                               Mathf.Max(size.y, lockboxMinSize)
+                            );
+                            lockboxSize = lockBoxRect.sizeDelta;
+
+                        }
+                        else if (lockBoxRect.sizeDelta != minLockbox)
+                        {
+
+
+                            lockBoxRect.sizeDelta = new Vector2(lockboxMinSize, lockboxMinSize);
+                            lockboxSize = lockBoxRect.sizeDelta;
+                        }
+
+                        // Position
+
+                        if (viewportTargetPosition.z > 0 && viewportTargetPosition != Vector3.zero && target != null)
+                        {
+                            ProfileManager.currentProfile.lockBox.SetActive(true);
+                            Vector3 targetUiPos = Vector3.Scale(viewportTargetPosition, new Vector3(1, 1, 0)) - screenCenter;
+
+                            targetUiPos = GameUtils.ClampToScreen(targetUiPos, ProfileManager.currentProfile.missilePanelSize, lockboxSize);
+
+
+                            ProfileManager.currentProfile.lockBox.transform.localPosition = targetUiPos;
+
+                            lastTargetPos = targetUiPos;
+                        }
+                        else
+                        {
+                            ProfileManager.currentProfile.lockBox.SetActive(false);
+                        }
+
+
+
+
+
+                        if (target != null)
+                        {
+                            if (target.NetworkHQ == null)
+                            {
+                                ProfileManager.currentProfile.missileTargetName.SetColor(Color.white);
+                            }
+                            else
+                            {
+                                ProfileManager.currentProfile.missileTargetName.SetColor(target.NetworkHQ == GameUtils.getHQ() ? GameAssets.i.HUDFriendly : GameAssets.i.HUDHostile);
+                            }
+
+                            ProfileManager.currentProfile.missileTargetName.SetText(target is Aircraft ? target.definition.unitName : target.unitName);
+
+                            float targetDistance = FastMath.Distance(targetPosition.ToGlobalPosition(), currentMissile.transform.GlobalPosition());
+
+                            ProfileManager.currentProfile.missileRange.SetText($"RNG {UnitConverter.DistanceReading(targetDistance)}");
+
+                            if (target.GetComponent<Rigidbody>() != null)
+                            {
+                                ProfileManager.currentProfile.leadIcon.SetActive(true);
+
+                                Vector3 targetVelocity = target.rb.velocity;
+
+                                Vector3 predictedPosition = targetPosition + targetVelocity * (targetDistance / currentMissile.rb.velocity.magnitude);
+
+                                Vector3 leadUiPos = Vector3.Scale(missileCam.WorldToScreenPoint(predictedPosition) - screenCenter, new(1, 1, 0));
+
+
+
+                                leadUiPos = GameUtils.ClampToScreen(leadUiPos, ProfileManager.currentProfile.missilePanelSize, ProfileManager.currentProfile.leadIcon.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.leadIconThing);
+
+                                ProfileManager.currentProfile.leadIcon.GetGameObject().transform.localPosition = leadUiPos;
+                            }
+                            else
+                            {
+
+                                
+                                ProfileManager.currentProfile.leadIcon.SetActive(false);
+                                
+                            }
+                        }
+                        else
+                        {
+                            ProfileManager.currentProfile.missileTargetName.SetColor(Color.white);
+                            ProfileManager.currentProfile.missileTargetName.SetText("No Target");
+                            ProfileManager.currentProfile.missileRange.SetText("RNG --");
+                            ProfileManager.currentProfile.leadIcon.SetActive(false);
+
+                        }
+
+                        currentMissile.UpdateRadarAlt();
+
+                        ProfileManager.currentProfile.missileIndex.SetText($"{MissilePatching.currentMissileIndex + 1}/{MissilePatching.missiles.Count}");
+                        ProfileManager.currentProfile.missileSpeed.SetText($"SPD {UnitConverter.SpeedReading(Mathf.Round(currentMissile.speed))}");
+                        ProfileManager.currentProfile.missileAltitude.SetText($"ALT {UnitConverter.AltitudeReading(currentMissile.radarAlt)}");
+
+
+                        // Velocity Vector
+                        Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;
+
+
+                        Vector3 vector = Vector3.Scale(missileCam.WorldToScreenPoint(position), new Vector3(1f, 1f, 0f)) - screenCenter;
+                        vector = GameUtils.ClampToScreen(vector, ProfileManager.currentProfile.missilePanelSize, ProfileManager.currentProfile.velocityVector.GetGameObject().GetComponent<RectTransform>().sizeDelta / ProfileManager.currentProfile.velocityVectorThing);
+                        ProfileManager.currentProfile.velocityVector.GetGameObject().transform.localPosition = vector;
+
+                        // Orientation Indicator
+
+                        ProfileManager.currentProfile.orientationIndicator.GetGameObject().transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
+
+
 
 
                     }
-                    else
-                    {
-                        ProfileManager.currentProfile.ToggleElements(false);
 
-                    }
+
+
 
                 }
                 else
                 {
                     ProfileManager.currentProfile.ToggleElements(false);
+
                 }
+
+            }
+            else
+            {
+                ProfileManager.currentProfile.ToggleElements(false);
             }
         }
 

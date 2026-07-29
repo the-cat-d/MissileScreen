@@ -76,21 +76,29 @@ namespace MissileView.UI
 
         public void ToggleElements(bool active)
         {
+           
             velocityVector.SetActive(active);
+           
             lockBox.SetActive(active);
+         
             leadIcon.SetActive(active);
 
+           
             missileIndex.SetActive(active);
             missileSpeed.SetActive(active);
             missileRange.SetActive(active);
             missileAltitude.SetActive(active);
             missileTargetName.SetActive(active);
+           
 
             if (hideGameObjects.Count > 0)
             {
                 foreach (var go in hideGameObjects)
                 {
-                    go.SetActive(!active);
+                    if (go)
+                    {
+                        go.SetActive(!active);
+                    }
                 }
             }
 
@@ -109,7 +117,10 @@ namespace MissileView.UI
             {
                 foreach (var go in hideGameObjects)
                 {
-                    go.SetActive(true);
+                   if (go)
+                   {
+                        go.SetActive(true);
+                   }
                 }
             }
         }

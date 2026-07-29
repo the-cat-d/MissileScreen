@@ -2,22 +2,19 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using MissileView.UI;
-using System;
-using System.Reflection;
-using UnityEngine;
 
 namespace MissileView
 {
 
-    // TODO: use Bepinex pubilicizer instead of reflection
-    // TODO: maybe add more logging?
+    // TODO: add an option for the missile camera to be displayed in the HUD
+    // TODO: indicate when a missile is about to be intercepted (i.e show a indicator when a missile is being targetted)
     // TODO: someway to show missile pitch cleanly
     // TODO: estimated flight time
     // TODO: gmblr info (i.e distance till submunition jettison)
+    // TODO: use accessibility option custom colors for team colors
     // TODO: more profile fine tuning
-    // TODO: add an option for the missile camera to be displayed in the HUD
-    // TODO: hide lockbox and lead indicator when position is off screen (when its behind the camera it will still be shown on the screen)
-
+    // TODO: maybe add more logging?
+    
 
 
     public static class PluginInfo
