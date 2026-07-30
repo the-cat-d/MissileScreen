@@ -1,12 +1,12 @@
 ﻿using HarmonyLib;
-using MissileView.UI;
+using MissileScreen.UI;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 
-namespace MissileView.Patches
+namespace MissileScreen.Patches
 {
     internal class MissilePatching
     {

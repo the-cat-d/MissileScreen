@@ -1,9 +1,9 @@
-﻿using MissileView.UI;
+﻿using MissileScreen.UI;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MissileView.UI_Profiles.AircraftProfiles
+namespace MissileScreen.UI_Profiles.AircraftProfiles
 {
     internal class AttackHelo1 // SAH-41 Chicane
     {

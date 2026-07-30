@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-namespace MissileView
+namespace MissileScreen
 {
     public class PluginConfig
     {

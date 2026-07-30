@@ -1,10 +1,10 @@
-﻿using MissileView.Source;
+﻿using MissileScreen.Source;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace MissileView.UI
+namespace MissileScreen.UI
 {
     
     internal class Profile

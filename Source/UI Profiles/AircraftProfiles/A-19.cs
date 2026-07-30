@@ -1,8 +1,8 @@
-﻿using MissileView.UI;
+﻿using MissileScreen.UI;
 using UnityEngine;
 
 
-namespace MissileView.UI_Profiles.AircraftProfiles
+namespace MissileScreen.UI_Profiles.AircraftProfiles
 {
     internal class CAS1 // A-19 Brawler
     {

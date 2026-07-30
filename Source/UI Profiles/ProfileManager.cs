@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using MissileView.Patches;
+using MissileScreen.Patches;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-namespace MissileView.UI
+namespace MissileScreen.UI
 {
     internal class ProfileManager
     {
@@ -36,7 +36,7 @@ namespace MissileView.UI
         public static void LoadProfiles()
         {
 
-            List<MethodInfo> profiles = typeof(ProfileManager).Assembly.GetTypes().Where(val => val.Namespace == "MissileView.UI_Profiles.AircraftProfiles").Select(method => method.GetMethod("Load")).ToList();
+            List<MethodInfo> profiles = typeof(ProfileManager).Assembly.GetTypes().Where(val => val.Namespace == "MissileScreen.UI_Profiles.AircraftProfiles").Select(method => method.GetMethod("Load")).ToList();
 
 
             for (int i = 0; i < profiles.Count; i++)

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace MissileView
+namespace MissileScreen
 {
     public class PluginSprites
     {
@@ -20,7 +20,7 @@ namespace MissileView
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            var resourcePath = $"{nameof(MissileView)}.Assets.{resourceName}";
+            var resourcePath = $"{nameof(MissileScreen)}.Assets.{resourceName}";
 
             using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
             {
