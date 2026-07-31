@@ -12,7 +12,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
             ProfileManager.AddProfile(new Profile
             {
 
-                ReplacePanelName = "EngPanel",
+                replacePanelName = "EngPanel",
                 clearOldPanel = false,
 
                 lockboxMinSize = 36,
@@ -22,8 +22,8 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
                 missilePanelRectPosition = new(407, 25.5f),
                 velocityVectorIconScale = 0.3f,
 
-                LeftPanelPivotYOffset = 2.6f,
-                RightPanelPivotYOffset = 2.3f,
+                leftPanelPivotYOffset = 2.6f,
+                rightPanelPivotYOffset = 2.3f,
 
             }, "CI-22");
         }

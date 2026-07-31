@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace MissileScreen
 {
     public class PluginSprites
     {
-        public static Sprite AttackSprite;
-        public static Sprite OrientationSprite;
+        public static Sprite attackSprite;
+        public static Sprite orientationSprite;
         public static Sprite lockBoxSprite;
         public static Sprite lockCursorSprite;
         public static Sprite lockCornerSprite;
         public static Sprite leadSprite;
 
-        internal static Sprite LoadImageInStream(string resourceName)
+        private static Sprite LoadImageInStream(string resourceName)
         {
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -50,8 +47,8 @@ namespace MissileScreen
         {
             Plugin.Logger.LogInfo("Loading Sprites...");    
 
-            AttackSprite = LoadImageInStream("attackIcon.png");
-            OrientationSprite = LoadImageInStream("orientationIndicator.png");
+            attackSprite = LoadImageInStream("attackIcon.png");
+            orientationSprite = LoadImageInStream("orientationIndicator.png");
             lockBoxSprite = LoadImageInStream("lockBox.png");
             lockCursorSprite = LoadImageInStream("lockCursor.png");
             lockCornerSprite = LoadImageInStream("lockBoxCorner.png");

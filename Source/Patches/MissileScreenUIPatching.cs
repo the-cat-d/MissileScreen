@@ -23,8 +23,8 @@ namespace MissileScreen.Patches
         
         public class MissileScreenUIPatches
         {
-            private const float errorFrequency = 3;
-            private static int errCount;
+            private const float _errorFrequency = 3;
+            private static int _errCount;
 
             // Runs when the player enters the aircraft
             // All the UI related work from the mod is done in this patch
@@ -34,7 +34,7 @@ namespace MissileScreen.Patches
 
                 static void Postfix(TacScreen __instance, Aircraft aircraft, Cockpit cockpit)
                 {
-                    var playerAircraft = GameUtils.getAircraft();
+                    var playerAircraft = GameUtils.GetAircraft();
                     if (aircraft == null || playerAircraft == null || aircraft != playerAircraft) return;
 
                     try
@@ -50,7 +50,7 @@ namespace MissileScreen.Patches
                         // Clear missile data on start up
 
                         MissilePatching.currentMissileIndex = 0;
-                        MissilePatching.missiles.Clear();
+                        MissilePatching.Missiles.Clear();
 
                         Plugin.Logger.LogDebug("Loaded TacScreen");
 
@@ -76,7 +76,7 @@ namespace MissileScreen.Patches
             public class TacScreenUpdate
             {
 
-                private static float timeSinceErr = 0;
+                private static float _timeSinceErr = 0;
                 
 
                 static void Postfix(TacScreen __instance)
@@ -87,23 +87,23 @@ namespace MissileScreen.Patches
 
                         Update();
                         
-                        timeSinceErr = 0;
-                        errCount = 0;
+                        _timeSinceErr = 0;
+                        _errCount = 0;
 
                     } catch (System.Exception error)
                     {
-                        errCount += 1;
-                        timeSinceErr -= Time.deltaTime;
+                        _errCount += 1;
+                        _timeSinceErr -= Time.deltaTime;
 
-                        if (timeSinceErr <= 0)
+                        if (_timeSinceErr <= 0)
                         {
 
-                            string finalErrCount = errCount > 1 ? "x" + errCount : "";
+                            string finalErrCount = _errCount > 1 ? "x" + _errCount : "";
 
                             Plugin.Logger.LogError($"Missile Screen Update Failure {finalErrCount} ({__instance.aircraft.definition.name}): {error.Message}{error.StackTrace}");
                             
 
-                            timeSinceErr = errorFrequency;
+                            _timeSinceErr = _errorFrequency;
                         }
 
                     }
@@ -125,20 +125,25 @@ namespace MissileScreen.Patches
             if (isPlaneCompatible == false) return;
            
 
-            if (Input.GetKeyDown(PluginConfig.cycleKey.Value))
+            if (Input.GetKeyDown(PluginConfig.cycleUpKey.Value))
             {
 
-                MissilePatching.CycleMissileView();
+                MissilePatching.CycleMissileViewUp();
 
             }
 
-
-            if (MissilePatching.missiles.Count > 0 && MissilePatching.currentMissileIndex < MissilePatching.missiles.Count)
+            if (Input.GetKeyDown(PluginConfig.cycleDownKey.Value))
             {
-                if (MissilePatching.missiles[MissilePatching.currentMissileIndex] != null)
+                MissilePatching.CycleMissileViewDown();
+            }
+
+
+            if (MissilePatching.Missiles.Count > 0 && MissilePatching.currentMissileIndex < MissilePatching.Missiles.Count)
+            {
+                if (MissilePatching.Missiles[MissilePatching.currentMissileIndex] != null)
                 {
 
-                    Missile currentMissile = MissilePatching.missiles[MissilePatching.currentMissileIndex];
+                    Missile currentMissile = MissilePatching.Missiles[MissilePatching.currentMissileIndex];
 
                     Camera missileCam = currentMissile.transform.GetComponentInChildren<Camera>(true);
 
@@ -271,7 +276,7 @@ namespace MissileScreen.Patches
                             }
                             else
                             {
-                                ProfileManager.currentProfile.missileTargetName.SetColor(target.NetworkHQ == GameUtils.getHQ() ? GameAssets.i.HUDFriendly : GameAssets.i.HUDHostile);
+                                ProfileManager.currentProfile.missileTargetName.SetColor(target.NetworkHQ == GameUtils.GetPlayerTeam() ? GameAssets.i.HUDFriendly : GameAssets.i.HUDHostile);
                             }
 
                             ProfileManager.currentProfile.missileTargetName.SetText(target is Aircraft ? target.definition.unitName : target.unitName);
@@ -315,7 +320,7 @@ namespace MissileScreen.Patches
 
                         currentMissile.UpdateRadarAlt();
 
-                        ProfileManager.currentProfile.missileIndex.SetText($"{MissilePatching.currentMissileIndex + 1}/{MissilePatching.missiles.Count}");
+                        ProfileManager.currentProfile.missileIndex.SetText($"{MissilePatching.currentMissileIndex + 1}/{MissilePatching.Missiles.Count}");
                         ProfileManager.currentProfile.missileSpeed.SetText($"SPD {UnitConverter.SpeedReading(Mathf.Round(currentMissile.speed))}");
                         ProfileManager.currentProfile.missileAltitude.SetText($"ALT {UnitConverter.AltitudeReading(currentMissile.radarAlt)}");
 

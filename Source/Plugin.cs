@@ -7,7 +7,6 @@ namespace MissileScreen
 {
 
     // TODO: add an option for the missile camera to be displayed in the HUD
-    // TODO: add a cycle down key 
     // TODO: add a sound or an indicator that a missile successfully hit its target
     // TODO: indicate when a missile is about to be intercepted (i.e show a indicator when a missile is being targetted)
     // TODO: someway to show missile pitch cleanly
@@ -30,8 +29,8 @@ namespace MissileScreen
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        internal static new ManualLogSource Logger;
-        internal Harmony harmony;
+        public static new ManualLogSource Logger;
+        private Harmony _harmony;
 
         private void Awake()
         {
@@ -43,8 +42,8 @@ namespace MissileScreen
 
             Logger.LogInfo($"Patching Harmony...");
 
-            harmony = new Harmony(PluginInfo.PLUGIN_GUID);
-            harmony.PatchAll();
+            _harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+            _harmony.PatchAll();
 
 
             Logger.LogInfo($"Harmony Patched!");
@@ -71,7 +70,7 @@ namespace MissileScreen
 
         private void OnDestroy()
         {
-            harmony?.UnpatchSelf();
+            _harmony?.UnpatchSelf();
         }
     }
 }

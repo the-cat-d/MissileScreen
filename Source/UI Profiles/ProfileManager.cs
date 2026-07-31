@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 
 namespace MissileScreen.UI
@@ -78,7 +79,7 @@ namespace MissileScreen.UI
 
             
 
-            profile.weaponPanel = GameUtils.FindChildRecursive(tacScreenInstance.transform,profile.ReplacePanelName);
+            profile.weaponPanel = GameUtils.FindChildRecursive(tacScreenInstance.transform,profile.replacePanelName);
 
             if (profile.weaponPanel == null)
             {
@@ -112,7 +113,7 @@ namespace MissileScreen.UI
 
             // Clear Missile Panel Components (besides RectTransform and CanvasRenderer)
 
-            Component[] panelComponents = profile.missilePanel.GetComponents<Component>();
+            Object[] panelComponents = profile.missilePanel.GetComponents<Component>();
 
             foreach (Component component in panelComponents)
             {
@@ -160,7 +161,7 @@ namespace MissileScreen.UI
 
             //Hierarchy - currently unused, keeping it just incase if i need it
 
-            profile.missilePanel.SetSiblingIndex(profile.hierachyOrder != -1 ? profile.hierachyOrder : profile.missilePanel.GetSiblingIndex());
+            profile.missilePanel.SetSiblingIndex(profile.hierarchyOrder != -1 ? profile.hierarchyOrder : profile.missilePanel.GetSiblingIndex());
 
             profile.missilePanelSize = profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
 
@@ -195,7 +196,7 @@ namespace MissileScreen.UI
             profile.velocityVector = new(
                 name: "FlightPath",
                 UIParent: profile.missilePanel.transform,
-                sprite: PluginSprites.AttackSprite,
+                sprite: PluginSprites.attackSprite,
                 imageColor: PluginConfig.velocityVectorColor.Value,
                 imageScale: new(profile.velocityVectorIconScale, profile.velocityVectorIconScale),
                 createOutline: true,
@@ -212,7 +213,7 @@ namespace MissileScreen.UI
             profile.orientationIndicator = new(
                 name: "orientationIndicator",
                 UIParent: profile.velocityVector.GetGameObject().transform,
-                sprite: PluginSprites.OrientationSprite,
+                sprite: PluginSprites.orientationSprite,
                 imageColor: PluginConfig.orientationIndicatorColor.Value,
                 imageScale: new Vector3(3, 1, 0),
                 createOutline: true,
@@ -297,7 +298,7 @@ namespace MissileScreen.UI
             profile.missileIndex.SetAnchorPivot(
                 new(0, 1),
                 new(0, 1),
-                new(0, profile.LeftPanelPivotYOffset)
+                new(0, profile.leftPanelPivotYOffset)
             );
 
             
@@ -339,7 +340,7 @@ namespace MissileScreen.UI
             profile.missileSpeed.SetAnchorPivot(
                 new(1, 1),
                 new(1, 1),
-                new(1, profile.RightPanelPivotYOffset)
+                new(1, profile.rightPanelPivotYOffset)
                 );
 
     
@@ -361,7 +362,7 @@ namespace MissileScreen.UI
             profile.missileAltitude.SetAnchorPivot(
                 new(1, 1),
                 new(1, 1),
-                new(1, profile.RightPanelPivotYOffset + profile.RightPanelPivotYOffsetIncrement)
+                new(1, profile.rightPanelPivotYOffset + profile.rightPanelPivotYOffsetIncrement)
             ); 
 
        
@@ -383,7 +384,7 @@ namespace MissileScreen.UI
             profile.missileRange.SetAnchorPivot(
               new(1, 1),
               new(1, 1),
-              new(1, profile.RightPanelPivotYOffset + profile.RightPanelPivotYOffsetIncrement * 2)
+              new(1, profile.rightPanelPivotYOffset + profile.rightPanelPivotYOffsetIncrement * 2)
              );
 
            

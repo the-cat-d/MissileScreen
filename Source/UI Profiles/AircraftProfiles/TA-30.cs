@@ -12,7 +12,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
             ProfileManager.AddProfile(new Profile
             {
 
-                ReplacePanelName = "frontProfile",
+                replacePanelName = "frontProfile",
                 clearOldPanel = false,
 
                 missilePanelRectSize = new(500, 325),

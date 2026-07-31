@@ -14,14 +14,14 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
         {
             ProfileManager.AddProfile(new Profile
             {
-                ReplacePanelName = "BasicFlightInstrument",
+                replacePanelName = "BasicFlightInstrument",
                 clearOldPanel = false,
 
                 lockboxMinSize = 42,
                 fontSize = 24,
 
-                LeftPanelPivotYOffset = 2.6f,
-                RightPanelPivotYOffset = 2.3f,
+                leftPanelPivotYOffset = 2.6f,
+                rightPanelPivotYOffset = 2.3f,
 
            
             }, nameof(AttackHelo1));
