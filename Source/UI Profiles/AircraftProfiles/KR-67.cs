@@ -11,7 +11,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
         {
             ProfileManager.AddProfile(new Profile
             {
-                ReplacePanelName = "StatusGauges",
+                replacePanelName = "StatusGauges",
 
                 fontSize = 47,
 
@@ -20,8 +20,8 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
                 velocityVectorIconScale = 0.4f,
                 leadIconScale = 1.3f,
 
-                LeftPanelPivotYOffset = 2.45f,
-                RightPanelPivotYOffset = 2.15f,
+                leftPanelPivotYOffset = 2.45f,
+                rightPanelPivotYOffset = 2.15f,
 
 
             }, nameof(Multirole1));
