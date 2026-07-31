@@ -27,9 +27,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\attackIcon.png" />
     <EmbeddedResource Include="Assets\leadIcon.png" />
-    <EmbeddedResource Include="Assets\lockBox.png" />
     <EmbeddedResource Include="Assets\lockBoxCorner.png" />
-    <EmbeddedResource Include="Assets\lockCursor.png" />
     <EmbeddedResource Include="Assets\orientationIndicator.png" />
   </ItemGroup>
 

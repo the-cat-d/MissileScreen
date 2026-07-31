@@ -8,8 +8,6 @@ namespace MissileScreen
     {
         public static Sprite attackSprite;
         public static Sprite orientationSprite;
-        public static Sprite lockBoxSprite;
-        public static Sprite lockCursorSprite;
         public static Sprite lockCornerSprite;
         public static Sprite leadSprite;
 
@@ -49,8 +47,6 @@ namespace MissileScreen
 
             attackSprite = LoadImageInStream("attackIcon.png");
             orientationSprite = LoadImageInStream("orientationIndicator.png");
-            lockBoxSprite = LoadImageInStream("lockBox.png");
-            lockCursorSprite = LoadImageInStream("lockCursor.png");
             lockCornerSprite = LoadImageInStream("lockBoxCorner.png");
             leadSprite = LoadImageInStream("leadIcon.png");
 

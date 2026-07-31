@@ -5,10 +5,9 @@ using MissileScreen.UI;
 
 namespace MissileScreen
 {
-
-    // TODO: add an option for the missile camera to be displayed in the HUD
+    
     // TODO: add a sound or an indicator that a missile successfully hit its target
-    // TODO: indicate when a missile is about to be intercepted (i.e show a indicator when a missile is being targetted)
+    // TODO: indicate when a missile is about to be intercepted (i.e show a indicator when a missile is being targeted)
     // TODO: someway to show missile pitch cleanly
     // TODO: estimated flight time
     // TODO: gmblr info (i.e distance till submunition jettison)
@@ -22,7 +21,7 @@ namespace MissileScreen
     {
         public const string PLUGIN_GUID = "MissileScreen";
         public const string PLUGIN_NAME = "Missile Screen";
-        public const string PLUGIN_VERSION = "1.0.0";
+        public const string PLUGIN_VERSION = "1.1.0";
     }
 
 

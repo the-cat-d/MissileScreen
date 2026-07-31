@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MissileScreen.Patches;
+using NuclearOption.MissionEditorScripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,25 +64,25 @@ namespace MissileScreen.UI
             }
         }
 
-        public static void InjectProfileUI(string AircraftName, TacScreen tacScreenInstance)
+        public static void InjectProfileUI(string aircraftName, GameObject mainInterface)
         {
 
-            Profile profile = GetProfileFromName(AircraftName);
+            Profile profile = GetProfileFromName(aircraftName);
 
             //// Validation Checks \\\\
 
             if (profile == null )
             {
-                Plugin.Logger.LogError($"Couldn't find Profile \"{AircraftName}\" ");
+                Plugin.Logger.LogError($"Couldn't find Profile \"{aircraftName}\" ");
                
                 return; // If the default profile is somehow not returned, then exit
             }
 
             
 
-            profile.weaponPanel = GameUtils.FindChildRecursive(tacScreenInstance.transform,profile.replacePanelName);
+            profile.weaponPanel = GameUtils.FindChildRecursive(mainInterface.transform,profile.replacePanelName);
 
-            if (profile.weaponPanel == null)
+            if (profile.weaponPanel == null && PluginConfig.hmdMissileScreen.Value == false)
             {
 
                 return; // If the plane doesn't have the panel, then exit
@@ -98,53 +99,72 @@ namespace MissileScreen.UI
 
             // Missile Panel GameObject
 
-            profile.missilePanel = UnityEngine.Object.Instantiate(profile.weaponPanel, profile.weaponPanel.transform.parent);
-            profile.missilePanel.name = "missilePanel";
-            
-
-
-            // Clear Missile Panel Children
-
-            foreach (Transform child in profile.missilePanel)
+            if (PluginConfig.hmdMissileScreen.Value == false)
             {
-                UnityEngine.Object.Destroy(child.gameObject); 
-            }
+                // TacScreen Panel Creation
+                
+                profile.missilePanel = UnityEngine.Object.Instantiate(profile.weaponPanel, profile.weaponPanel.transform.parent);
+                profile.missilePanel.name = "missilePanel";
+                
+                // Clear Missile Panel Children
 
-
-            // Clear Missile Panel Components (besides RectTransform and CanvasRenderer)
-
-            Object[] panelComponents = profile.missilePanel.GetComponents<Component>();
-
-            foreach (Component component in panelComponents)
-            {
-                if (!(component is RectTransform) && !(component is CanvasRenderer)) {
-                    Component.Destroy(component);
-                }
-            }
-
-            // Clearing of the old panel that was instantiated from (if the profile is set to do so)
-
-            if (profile.clearOldPanel)
-            {
-                profile.weaponPanel.gameObject.SetActive(true);
-            }
-
-            // Getting hideGameObject (if the profile is set to do so)
-            
-            if (profile.hideGameObjectNames.Count > 0)
-            {
-                for (int i = 0; i < profile.hideGameObjectNames.Count; i++)
+                foreach (Transform child in profile.missilePanel)
                 {
-                    Transform hideGameObject = GameUtils.FindChildRecursive(tacScreenInstance.transform, profile.hideGameObjectNames[i]);
-                    if (hideGameObject != null)
-                    {
-                       profile.hideGameObjects.Add(hideGameObject.gameObject);
-                        
+                    UnityEngine.Object.Destroy(child.gameObject); 
+                }
+                
+                // Clear Missile Panel Components (besides RectTransform and CanvasRenderer)
+
+                Object[] panelComponents = profile.missilePanel.GetComponents<Component>();
+
+                foreach (Component component in panelComponents)
+                {
+                    if (!(component is RectTransform) && !(component is CanvasRenderer)) {
+                        Component.Destroy(component);
                     }
+                }
+
+                // Clearing of the old panel that was instantiated from (if the profile is set to do so)
+
+                if (profile.clearOldPanel)
+                {
+                    profile.weaponPanel.gameObject.SetActive(true);
+                }
+                
+                // Getting hideGameObject (if the profile is set to do so)
+            
+                if (profile.hideGameObjectNames.Count > 0)
+                {
+                    for (int i = 0; i < profile.hideGameObjectNames.Count; i++)
+                    {
+                        Transform hideGameObject = GameUtils.FindChildRecursive(mainInterface.transform, profile.hideGameObjectNames[i]);
+                        if (hideGameObject != null)
+                        {
+                            profile.hideGameObjects.Add(hideGameObject.gameObject);
+                        
+                        }
+                    }
+                
                 }
                 
             }
-         
+            else
+            {
+                // HMD Panel Creation
+                
+                GameObject newPanel = new GameObject("missilePanel",typeof(RectTransform));
+                newPanel.transform.SetParent(mainInterface.transform);  
+                newPanel.transform.localPosition = Vector3.zero;
+                newPanel.transform.localRotation = Quaternion.identity;
+                newPanel.transform.localScale = Vector3.one * PluginConfig.hmdMissileScreenScale.Value;
+                
+                newPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(430,250);
+                newPanel.GetComponent<RectTransform>().anchoredPosition = PluginConfig.hmdMissileScreenPosition.Value;
+                
+                
+                profile.missilePanel = newPanel.transform;
+            }
+           
 
 
             //// Panel Configuration \\\\
@@ -392,6 +412,8 @@ namespace MissileScreen.UI
             currentProfile = profile;
 
         }
+       
+
 
 
 
