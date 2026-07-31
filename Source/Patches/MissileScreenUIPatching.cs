@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MissileScreen.Patches
 {
-    internal class MissileScreenUIPatching
+    public static class MissileScreenUIPatching
     {
 
 
@@ -21,7 +21,7 @@ namespace MissileScreen.Patches
         //// Patches \\\\
 
         
-        public class MissileScreenUIPatches
+        public static class MissileScreenUIPatches
         {
             private const float _errorFrequency = 3;
             private static int _errCount;
@@ -35,31 +35,9 @@ namespace MissileScreen.Patches
                 static void Postfix(TacScreen __instance, Aircraft aircraft, Cockpit cockpit)
                 {
                     var playerAircraft = GameUtils.GetAircraft();
-                    if (aircraft == null || playerAircraft == null || aircraft != playerAircraft) return;
+                    if (aircraft == null || playerAircraft == null || aircraft != playerAircraft || PluginConfig.hmdMissileScreen.Value == true) return;
 
-                    try
-                    {
-                        isPlaneCompatible = false;
-
-
-                        // Create Missile Screen UI
-
-                        ProfileManager.InjectProfileUI(aircraft.definition.name, __instance);
-
-
-                        // Clear missile data on start up
-
-                        MissilePatching.currentMissileIndex = 0;
-                        MissilePatching.Missiles.Clear();
-
-                        Plugin.Logger.LogDebug("Loaded TacScreen");
-
-                    }
-                    catch (System.Exception error)
-                    {
-                        Plugin.Logger.LogError($"Failed to inject UI ({aircraft.definition.name}): {error.Message}\n{error.StackTrace}");
-                    }
-
+                    InitUI(aircraft,__instance.gameObject);
 
 
                 }
@@ -110,6 +88,20 @@ namespace MissileScreen.Patches
 
                 }
             }
+
+            
+            [HarmonyPatch(typeof(HeadMountedDisplay), "Start")]
+            public class HeadMountedDisplayInit
+            {
+                static void Postfix(HeadMountedDisplay __instance)
+                {
+                    if (PluginConfig.hmdMissileScreen.Value == false) return; // if the option for the HMD screen is disabled, exit 
+                    
+                    InitUI(__instance.aircraftPrev,__instance.gameObject,true);
+                    
+                }
+            }
+            
         }
 
 
@@ -359,6 +351,34 @@ namespace MissileScreen.Patches
             }
         }
 
-       
+
+        private static void InitUI(Unit aircraft, GameObject mainInstance,bool useDefault = false)
+        {
+            try
+            {
+                isPlaneCompatible = false;
+
+
+                // Create Missile Screen UI
+                
+                Plugin.Logger.LogDebug(mainInstance.name);
+
+                ProfileManager.InjectProfileUI(useDefault ? "" : aircraft.definition.name, mainInstance);
+
+
+                // Clear missile data on start up
+
+                MissilePatching.currentMissileIndex = 0;
+                MissilePatching.Missiles.Clear();
+
+                Plugin.Logger.LogDebug("Loaded TacScreen");
+
+            }
+            catch (System.Exception error)
+            {
+                Plugin.Logger.LogError($"Failed to inject UI ({aircraft.definition.name}): {error.Message}\n{error.StackTrace}");
+            }
+        }
+        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using MissileScreen.UI;
 using UnityEngine;
 
 namespace MissileScreen
@@ -17,7 +18,10 @@ namespace MissileScreen
 
         // UI Config
 
-
+        public static ConfigEntry<bool> hmdMissileScreen;
+        public static ConfigEntry<Vector2> hmdMissileScreenPosition;
+        public static ConfigEntry<float> hmdMissileScreenScale;
+        
 
         public static ConfigEntry<bool> fixedLockBox;
 
@@ -82,7 +86,46 @@ namespace MissileScreen
                 );
 
             // UI Config
+            
+            hmdMissileScreen = config.Bind(
+                "UI Config",
+                "HMD Missile Screen",
+                false,
+                "Changes the missile screen to be displayed on the HUD instead of the cockpit tac screen."
+                );
+            
+            hmdMissileScreenScale = config.Bind(
+                "UI Config",
+                "HMD Missile Screen Scale",
+                1f,
+                "The scale of the missile screen panel. This only affects the HMD missile screen"
+                );
+            
+            hmdMissileScreenScale.SettingChanged += (sender, args) =>
+            {
+                if (ProfileManager.currentProfile == null || hmdMissileScreen.Value == false ) return;
+  
+                
+                ProfileManager.currentProfile.missilePanel.localScale = Vector3.one * hmdMissileScreenScale.Value;
+                
+            };
+            
+            hmdMissileScreenPosition = config.Bind(
+                "UI Config",
+                "HMD Missile Screen Position",
+                new Vector2(-740, -30),
+                "The position of the missile screen panel. This only affects the HMD missile screen" 
+                );
 
+            hmdMissileScreenPosition.SettingChanged += (sender, args) =>
+            {
+                if (ProfileManager.currentProfile == null || hmdMissileScreen.Value == false ) return;
+  
+                
+                ProfileManager.currentProfile.missilePanel.GetComponent<RectTransform>().anchoredPosition = hmdMissileScreenPosition.Value;
+                
+            };
+            
             fixedLockBox = config.Bind(
                 "UI Config",
                 "Fixed Target Lockbox Size",
