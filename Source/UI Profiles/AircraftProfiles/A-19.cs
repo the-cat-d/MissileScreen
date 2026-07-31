@@ -11,7 +11,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
             ProfileManager.AddProfile(new Profile
             {
 
-                ReplacePanelName = "SystemStatus",
+                replacePanelName = "SystemStatus",
                 clearOldPanel = false,
 
                 missilePanelRectSize = new(384, 250),

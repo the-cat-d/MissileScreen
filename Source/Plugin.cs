@@ -30,8 +30,8 @@ namespace MissileScreen
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        internal static new ManualLogSource Logger;
-        internal Harmony harmony;
+        public static new ManualLogSource Logger;
+        private Harmony _harmony;
 
         private void Awake()
         {
@@ -43,8 +43,8 @@ namespace MissileScreen
 
             Logger.LogInfo($"Patching Harmony...");
 
-            harmony = new Harmony(PluginInfo.PLUGIN_GUID);
-            harmony.PatchAll();
+            _harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+            _harmony.PatchAll();
 
 
             Logger.LogInfo($"Harmony Patched!");
@@ -71,7 +71,7 @@ namespace MissileScreen
 
         private void OnDestroy()
         {
-            harmony?.UnpatchSelf();
+            _harmony?.UnpatchSelf();
         }
     }
 }

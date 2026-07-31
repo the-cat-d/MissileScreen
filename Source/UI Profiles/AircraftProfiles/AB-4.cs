@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MissileScreen.UI_Profiles.AircraftProfiles
 {
-    internal class FastBomber1 // Alkyon
+    internal class FastBomber1 // AB-4 Alkyon
     {
 
         public static void Load()
@@ -17,7 +17,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
                 fontSize = 28,
 
 
-                RightPanelPivotYOffset = 2.25f,
+                rightPanelPivotYOffset = 2.25f,
 
             }, nameof(FastBomber1));
         }

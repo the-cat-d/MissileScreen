@@ -1,5 +1,4 @@
 ﻿using MissileScreen.Source;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,8 +10,8 @@ namespace MissileScreen.UI
     {
         // Public Static
 
-        public static Quaternion rotationDefault = Quaternion.Euler(1,1,1);
-        public static Vector2 positionDefault = new Vector2(1.0001f, 1.001f); // yes really specific ik...
+        public static readonly Quaternion rotationDefault = Quaternion.Euler(1,1,1);
+        public static readonly Vector2 positionDefault = new Vector2(1.0001f, 1.001f); // yes really specific ik...
 
 
 
@@ -43,8 +42,8 @@ namespace MissileScreen.UI
 
         public Vector2 missilePanelSize;
 
-        // Hides a specfic game object from the Tacscreen when the missile is active.
-        public List<GameObject> hideGameObjects = new List<GameObject>();
+        // Hides a specific game object from the TacScreen when the missile is active.
+        public readonly List<GameObject>  hideGameObjects = new List<GameObject>();
 
 
         // Unique Aircraft Config
@@ -53,25 +52,25 @@ namespace MissileScreen.UI
         public Vector2 missilePanelRectSize;
         public Quaternion missilePanelRectRotation = rotationDefault;
 
-        public float RightPanelPivotYOffset = 2.2f;
-        public float RightPanelPivotYOffsetIncrement = 1;
+        public float rightPanelPivotYOffset = 2.2f;
+        public float rightPanelPivotYOffsetIncrement = 1;
 
-        public float LeftPanelPivotYOffset = 2.5f;
+        public float leftPanelPivotYOffset = 2.5f;
 
         public float velocityVectorIconScale = 0.4f;
-        public string ReplacePanelName = "weaponPanel";
+        public string replacePanelName = "weaponPanel";
         public int fontSize = 37;
         public float leadIconScale = 1;
         public float lockboxCornerScale = 0.3f;
         public int lockboxMinSize = 50;
         public bool clearOldPanel = true;
-        public int hierachyOrder = -1;
+        public int hierarchyOrder = -1;
 
         public float velocityVectorThing = 4;
         public float leadIconThing = 2;
 
        
-        // Hides specfic game objects from the TacScreen when a missile is active.
+        // Hides specific game objects from the TacScreen when a missile is active.
         public List<string> hideGameObjectNames = new List<string>();
 
         public void ToggleElements(bool active)
