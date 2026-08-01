@@ -35,9 +35,17 @@ namespace MissileScreen.Patches
                 static void Postfix(TacScreen __instance, Aircraft aircraft, Cockpit cockpit)
                 {
                     var playerAircraft = GameUtils.GetAircraft();
-                    if (aircraft == null || playerAircraft == null || aircraft != playerAircraft || PluginConfig.hmdMissileScreen.Value == true) return;
+                    if (aircraft == null || playerAircraft == null || aircraft != playerAircraft) return;
 
-                    InitUI(aircraft,__instance.gameObject);
+
+                    if (PluginConfig.hmdMissileScreen.Value == false)
+                    {
+                        InitUI(aircraft,__instance.gameObject);
+                    } else
+                    {
+                        InitUI(aircraft,SceneSingleton<FlightHud>.i.HMDCenter.gameObject,true);
+                    }
+                   
 
 
                 }
@@ -90,17 +98,7 @@ namespace MissileScreen.Patches
             }
 
             
-            [HarmonyPatch(typeof(HeadMountedDisplay), "Start")]
-            public class HeadMountedDisplayInit
-            {
-                static void Postfix(HeadMountedDisplay __instance)
-                {
-                    if (PluginConfig.hmdMissileScreen.Value == false) return; // if the option for the HMD screen is disabled, exit 
-                    
-                    InitUI(__instance.aircraftPrev,__instance.gameObject,true);
-                    
-                }
-            }
+           
             
         }
 
@@ -367,9 +365,12 @@ namespace MissileScreen.Patches
 
 
                 // Clear missile data on start up
-
+                
+                MissilePatching.DisableAllMissileCams();
                 MissilePatching.currentMissileIndex = 0;
                 MissilePatching.Missiles.Clear();
+                
+                ProfileManager.currentProfile.NoMissileDisplay();
 
                 Plugin.Logger.LogDebug("Loaded TacScreen");
 

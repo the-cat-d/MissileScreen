@@ -78,7 +78,13 @@ namespace MissileScreen.UI
                 return; // If the default profile is somehow not returned, then exit
             }
 
+
+            Transform foundPanelHUD = SceneSingleton<FlightHud>.i.HMDCenter.transform.Find("missilePanel"); 
             
+            if (foundPanelHUD)
+            {
+                GameObject.Destroy(foundPanelHUD.gameObject);
+            }
 
             profile.weaponPanel = GameUtils.FindChildRecursive(mainInterface.transform,profile.replacePanelName);
 
@@ -90,9 +96,6 @@ namespace MissileScreen.UI
             }
 
             MissileScreenUIPatching.isPlaneCompatible = true;
-
-            
-
 
 
             //// Missile Panel Creation \\\\
