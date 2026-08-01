@@ -144,7 +144,7 @@ namespace MissileScreen.Patches
 
                 _currentMissileCamera = missileCam;
 
-                Plugin.Logger.LogDebug(PluginConfig.cameraRenderDistance.Value);
+                
                 missileCam.farClipPlane = PluginConfig.cameraRenderDistance.Value;
                 missileCam.fieldOfView = PluginConfig.cameraFOV.Value;
                 missileCam.transform.localPosition = PluginConfig.missileCameraOffset.Value;
@@ -346,7 +346,19 @@ namespace MissileScreen.Patches
         }
 
 
-       
+        public static void DisableAllMissileCams()
+        {
+            
+            for (int i = 0; i < Missiles.Count; i++)
+            {
+                var missileCam = Missiles[i].transform.GetComponentInChildren<Camera>(true);
+                if (missileCam != null)
+                {
+                    
+                    missileCam.gameObject.SetActive(false);
+                }
+            }
+        }
 
     }
 }

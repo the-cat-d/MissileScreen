@@ -5,7 +5,7 @@ using MissileScreen.UI;
 
 namespace MissileScreen
 {
-    
+    // TODO: use tmpro instead of normal text 
     // TODO: add a sound or an indicator that a missile successfully hit its target
     // TODO: indicate when a missile is about to be intercepted (i.e show a indicator when a missile is being targeted)
     // TODO: someway to show missile pitch cleanly
@@ -21,7 +21,7 @@ namespace MissileScreen
     {
         public const string PLUGIN_GUID = "MissileScreen";
         public const string PLUGIN_NAME = "Missile Screen";
-        public const string PLUGIN_VERSION = "1.1.0";
+        public const string PLUGIN_VERSION = "1.1.1";
     }
 
 
