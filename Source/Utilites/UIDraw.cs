@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace MissileScreen.Source
 {
-    internal class UIDraw
+    public static class UIDraw
     {
         public abstract class UIElement
         {
@@ -16,14 +14,14 @@ namespace MissileScreen.Source
 
             protected UIElement(
                 string name,
-                Transform UIParent = null
+                Transform uiParent = null
 
                 )
             {
 
-                if (UIParent != null)
+                if (uiParent != null)
                 {
-                    foreach (Transform child in UIParent)
+                    foreach (Transform child in uiParent)
                     {
                         if (child.name == name)
                         {
@@ -36,7 +34,7 @@ namespace MissileScreen.Source
                 }
                 // Create a new GameObject for the element
                 gameObject = new GameObject(name);
-                gameObject.transform.SetParent(UIParent, false);
+                gameObject.transform.SetParent(uiParent, false);
                 rectTransform = gameObject.AddComponent<RectTransform>();
 
                 return;
@@ -76,19 +74,19 @@ namespace MissileScreen.Source
 
         public class UILabel : UIElement
         {
-            private Text textComponent;
+            private TextMeshProUGUI textComponent;
             private float backgroundOpacity;
 
             public UILabel(
                 string name,
                 Vector2 position,
-                Transform UIParent = null,
+                Transform uiParent = null,
                 string text = "",
                 int fontSize = 24,
-                TextAnchor fontAlignment = TextAnchor.MiddleLeft,
+                TextAlignmentOptions fontAlignment = TextAlignmentOptions.Left ,// .MiddleLeft
                 Color? textColor = null
 
-                ) : base(name, UIParent)
+                ) : base(name, uiParent)
             {
 
                 imageComponent = gameObject.AddComponent<Image>();
@@ -106,16 +104,16 @@ namespace MissileScreen.Source
                 textRect.anchorMax = Vector2.one;
                 textRect.offsetMin = Vector2.zero;
                 textRect.offsetMax = Vector2.zero;
-                Text textComp = textObj.AddComponent<Text>();
+                TextMeshProUGUI textComp = textObj.AddComponent<TextMeshProUGUI>();
                 textComp.font = GetDefaultFont();
                 textComp.fontSize = fontSize;
-                textComp.fontStyle = FontStyle.Normal;
+                textComp.fontStyle = FontStyles.Normal;
                 textComp.color = textColor ?? Color.white;
 
                 textComp.alignment = fontAlignment;
                 textComp.text = text;
-                textComp.horizontalOverflow = HorizontalWrapMode.Overflow;
-                textComp.verticalOverflow = VerticalWrapMode.Overflow;
+                textComp.overflowMode = TextOverflowModes.Overflow;
+                
                 rectTransform.sizeDelta = new Vector2(textComp.preferredWidth, textComp.fontSize);
 
                 textComponent = textComp;
@@ -148,7 +146,7 @@ namespace MissileScreen.Source
                 rectTransform.sizeDelta = new Vector2(textComponent.preferredWidth, textComponent.preferredHeight);
             }
 
-            public void SetTextAlignment(TextAnchor alignment)
+            public void SetTextAlignment(TextAlignmentOptions alignment)
             {
                 textComponent.alignment = alignment;
             }
@@ -165,10 +163,10 @@ namespace MissileScreen.Source
 
         public class UIImage : UIElement
         {
-            private Image iconComponent;
+            private Image _iconComponent;
             public UIImage(
                 string name,
-                Transform UIParent,
+                Transform uiParent,
                 Sprite sprite,
                 Color imageColor,
                 Vector2? imageScale,
@@ -176,37 +174,36 @@ namespace MissileScreen.Source
                 Vector2? outlineThickness,
                 bool createOutline = false
 
-                ) : base(name, UIParent)
+                ) : base(name, uiParent)
             {
-                iconComponent = gameObject.AddComponent<Image>();
-                iconComponent.transform.parent = UIParent;
+                _iconComponent = gameObject.AddComponent<Image>();
+                _iconComponent.transform.parent = uiParent;
                 gameObject.transform.localPosition = Vector3.zero;
                 gameObject.transform.localRotation = Quaternion.identity;
                 gameObject.transform.localScale = imageScale ?? new Vector2(1, 1);
 
 
-                iconComponent.sprite = sprite;
-                iconComponent.color = imageColor;
+                _iconComponent.sprite = sprite;
+                _iconComponent.color = imageColor;
 
-                if (createOutline)
-                {
-                    Outline imageOutline = gameObject.AddComponent<Outline>();
-                    imageOutline.effectColor = outlineColor ?? Color.white;
-                    imageOutline.effectDistance = outlineThickness ?? new(1, 1);
-                }
+                if (!createOutline) return;
+
+                Outline imageOutline = gameObject.AddComponent<Outline>();
+                imageOutline.effectColor = outlineColor ?? Color.white;
+                imageOutline.effectDistance = outlineThickness ?? new(1, 1);
 
 
             }
 
             public void ChangeImageColor(Color newColor)
             {
-                iconComponent.color = newColor;
+                _iconComponent.color = newColor;
             }
         }
 
-        public static Font GetDefaultFont()
+        public static TMP_FontAsset GetDefaultFont()
         {
-            Text weaponText = SceneSingleton<CombatHUD>.i.GetComponentInChildren<Text>();
+            TextMeshProUGUI weaponText = SceneSingleton<CombatHUD>.i.GetComponentInChildren<TextMeshProUGUI>();
             return weaponText.font;
         }
     }
