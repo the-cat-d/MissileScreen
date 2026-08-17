@@ -19,10 +19,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
 
                 lockboxMinSize = 42,
                 fontSize = 24,
-
-                leftPanelPivotYOffset = 2.6f,
-                rightPanelPivotYOffset = 2.3f,
-
+                
            
             }, nameof(AttackHelo1));
         }

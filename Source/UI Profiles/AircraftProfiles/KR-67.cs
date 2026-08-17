@@ -20,8 +20,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
                 velocityVectorIconScale = 0.4f,
                 leadIconScale = 1.3f,
 
-                leftPanelPivotYOffset = 2.45f,
-                rightPanelPivotYOffset = 2.15f,
+          
 
 
             }, nameof(Multirole1));

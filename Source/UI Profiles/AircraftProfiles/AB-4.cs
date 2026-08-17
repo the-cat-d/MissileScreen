@@ -17,7 +17,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
                 fontSize = 28,
 
 
-                rightPanelPivotYOffset = 2.25f,
+
 
             }, nameof(FastBomber1));
         }

@@ -1,6 +1,5 @@
-﻿using HarmonyLib;
-using MissileScreen.Patches;
-using NuclearOption.MissionEditorScripts;
+﻿using MissileScreen.Patches;
+using MissileScreen.Source;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,24 +13,23 @@ namespace MissileScreen.UI
 {
     internal class ProfileManager
     {
-        public static Profile currentProfile = null;
-        public static Profile defaultProfile = new Profile();
+        public static Profile currentProfile;
+        private static readonly Profile _defaultProfile = new Profile();
        
 
-        private static Dictionary<string,Profile> LoadedProfiles = new Dictionary<string,Profile>(StringComparer.Ordinal);
+        private static readonly Dictionary<string,Profile> _loadedProfiles = new Dictionary<string,Profile>(StringComparer.Ordinal);
 
         public static void AddProfile(Profile profile,string aircraftName)
         {
   
             if (profile == null)
             {
-                Plugin.Logger.LogError($"Aircraft Profile is null!");
-                return;
+                Plugin.logger.LogError($"Aircraft Profile is null!");
             }
             else
             {
-                LoadedProfiles[aircraftName] = profile;
-                Plugin.Logger.LogInfo($"Profile For \"{aircraftName}\" Added");
+                _loadedProfiles[aircraftName] = profile;
+                Plugin.logger.LogDebug($"Profile For \"{aircraftName}\" Added");
             }
         }
 
@@ -46,20 +44,25 @@ namespace MissileScreen.UI
                try 
                { 
                     profiles[i].Invoke(null, null);
-               } catch { }
+               }
+               catch
+               {
+                   // ignored
+               }
             }
         }
 
         private static Profile GetProfileFromName(string name)
         {
-            if (LoadedProfiles.ContainsKey(name))
+
+            if (_loadedProfiles.TryGetValue(name,out Profile profile))
             {
-                Plugin.Logger.LogDebug($"Found \"{name}\" Profile, Loading...");
-                return LoadedProfiles[name];
+                Plugin.logger.LogDebug($"Found \"{name}\" Profile, Loading...");
+                return profile;
             } else
             {
-                Plugin.Logger.LogError($"Couldn't find Profile \"{name}\". Refering to Default Profile");
-                return defaultProfile;
+                Plugin.logger.LogWarning($"Couldn't find Profile \"{name}\". Referring to Default Profile");
+                return _defaultProfile;
                 
             }
         }
@@ -73,7 +76,7 @@ namespace MissileScreen.UI
 
             if (profile == null )
             {
-                Plugin.Logger.LogError($"Couldn't find Profile \"{aircraftName}\" ");
+                Plugin.logger.LogError($"Couldn't find Profile \"{aircraftName}\" ");
                
                 return; // If the default profile is somehow not returned, then exit
             }
@@ -113,16 +116,15 @@ namespace MissileScreen.UI
 
                 foreach (Transform child in profile.missilePanel)
                 {
-                    UnityEngine.Object.Destroy(child.gameObject); 
+                    Object.Destroy(child.gameObject); 
                 }
                 
                 // Clear Missile Panel Components (besides RectTransform and CanvasRenderer)
 
-                Object[] panelComponents = profile.missilePanel.GetComponents<Component>();
 
-                foreach (Component component in panelComponents)
+                foreach (Component component in profile.missilePanel.GetComponents<Component>())
                 {
-                    if (!(component is RectTransform) && !(component is CanvasRenderer)) {
+                    if (component is not RectTransform && component is not CanvasRenderer) {
                         Component.Destroy(component);
                     }
                 }
@@ -182,7 +184,7 @@ namespace MissileScreen.UI
             // Missile Panel Rotation
             profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile.rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
 
-            //Hierarchy - currently unused, keeping it just incase if i need it
+            //Hierarchy - currently unused, keeping it just in case if I need it
 
             profile.missilePanel.SetSiblingIndex(profile.hierarchyOrder != -1 ? profile.hierarchyOrder : profile.missilePanel.GetSiblingIndex());
 
@@ -190,16 +192,21 @@ namespace MissileScreen.UI
 
             //// Panel Creation \\\\
 
-
+            
             // Screen
 
             MissileScreenUIPatching.renderTexture = new((int)profile.missilePanelSize.x, (int)profile.missilePanelSize.y, 16, RenderTextureFormat.ARGB32);
 
-            profile.screen = new("missileScreen");
-            profile.screen.transform.parent = profile.missilePanel;
-            profile.screen.transform.localPosition = Vector3.zero;
-            profile.screen.transform.localRotation = Quaternion.Euler(0, 0, 0);
-            profile.screen.transform.localScale = new Vector3(1, 1, 0);
+            profile.screen = new("missileScreen")
+            {
+                transform =
+                {
+                    parent = profile.missilePanel,
+                    localPosition = Vector3.zero,
+                    localRotation = Quaternion.Euler(0, 0, 0),
+                    localScale = new Vector3(1, 1, 0),
+                },
+            };
             profile.screen.SetActive(false);
 
             RectTransform screenRect = profile.screen.AddComponent<RectTransform>();
@@ -212,13 +219,13 @@ namespace MissileScreen.UI
             screenImage.texture = MissileScreenUIPatching.renderTexture;
             screenImage.color = Color.white;
 
-      
+            // Icons \\
 
             // Flight Path
 
             profile.velocityVector = new(
-                name: "FlightPath",
-                UIParent: profile.missilePanel.transform,
+                newName: "FlightPath",
+                uiParent: profile.missilePanel.transform,
                 sprite: PluginSprites.attackSprite,
                 imageColor: PluginConfig.velocityVectorColor.Value,
                 imageScale: new(profile.velocityVectorIconScale, profile.velocityVectorIconScale),
@@ -231,11 +238,11 @@ namespace MissileScreen.UI
 
 
 
-            // Orienation Indicator
+            // Orientation Indicator
 
             profile.orientationIndicator = new(
-                name: "orientationIndicator",
-                UIParent: profile.velocityVector.GetGameObject().transform,
+                newName: "orientationIndicator",
+                uiParent: profile.velocityVector.GetGameObject().transform,
                 sprite: PluginSprites.orientationSprite,
                 imageColor: PluginConfig.orientationIndicatorColor.Value,
                 imageScale: new Vector3(3, 1, 0),
@@ -249,8 +256,8 @@ namespace MissileScreen.UI
             // Lead Icon
            
             profile.leadIcon = new(
-                name:"leadIcon",
-                UIParent:profile.missilePanel.transform,
+                newName:"leadIcon",
+                uiParent:profile.missilePanel.transform,
                 sprite:PluginSprites.leadSprite,
                 imageColor:PluginConfig.leadIconColor.Value,
                 imageScale:new(profile.leadIconScale, profile.leadIconScale),
@@ -263,11 +270,16 @@ namespace MissileScreen.UI
 
             // Lockbox
 
-            profile.lockBox = new("lockBox", typeof(RectTransform), typeof(Outline));
-            profile.lockBox.transform.parent = profile.missilePanel.transform;
-            profile.lockBox.transform.localPosition = Vector3.zero;
-            profile.lockBox.transform.localRotation = Quaternion.Euler(0, 0, 0);
-            profile.lockBox.transform.localScale = new Vector3(profile.leadIconScale, profile.leadIconScale, 0);
+            profile.lockBox = new GameObject("lockBox", typeof(RectTransform), typeof(Outline))
+            {
+                transform =
+                {
+                    parent = profile.missilePanel.transform,
+                    localPosition = Vector3.zero,
+                    localRotation = Quaternion.Euler(0, 0, 0),
+                    localScale = new Vector3(profile.leadIconScale, profile.leadIconScale, 0),
+                },
+            };
             profile.lockBox.GetComponent<RectTransform>().sizeDelta = new(profile.lockboxMinSize, profile.lockboxMinSize);
 
 
@@ -278,139 +290,166 @@ namespace MissileScreen.UI
             CreateLockBoxCorner(profile.lockBox.transform, new(profile.lockboxCornerScale, -profile.lockboxCornerScale, 0), new(0, 0), new(0, 1));
 
 
-
+            
+            // Labels \\
+            
             // Missile Name 
 
+            if (!PluginConfig.hideMissileName.Value)
+            {
+                profile.missileName = new(
 
-            profile.missileName = new(
+                    newName: "missileName",
+                    position: new(5, -5),
+                    uiParent: profile.missilePanel,
+                    text: "No Missile",
+                    fontSize: Mathf.RoundToInt(profile.fontSize * PluginConfig.globalFontScale.Value),
+                    textColor: PluginConfig.missileNameColor.Value,
+                    alignElement: false
 
-                name: "missileName",
-                position: new(5, -5),
-                UIParent: profile.missilePanel,
-                text: "No Missile",
-                fontSize: profile.fontSize,
-                textColor: PluginConfig.missileNameColor.Value
-
-             );
-
-
-            profile.missileName.SetAnchorPivot(
-                new(0, 1),
-                new(0, 1),
-                new(0, 1)
-            );
+                    );
 
 
+                profile.missileName.SetAnchorPivot(
+                    new(0, 1),
+                    new(0, 1),
+                    new(0, 1)
+                    );
+
+            } else
+            {
+                UIDraw.lastElement = null;
+            }
 
 
-           // Missile Index
 
-           profile.missileIndex = new(
 
-                name:"missileIndex", 
-                position:new(5, 0),
-                UIParent:profile.missilePanel,
-                text:"0/0",
-                fontSize:Mathf.RoundToInt(profile.fontSize / 1.3f), 
-                textColor:Color.white
+            // Missile Index
 
-           );
-  
+           if (!PluginConfig.hideMissileIndex.Value)
+           {
+               profile.missileIndex = new(
+
+                   newName:"missileIndex", 
+                   position:new(5,-5),
+                   uiParent:profile.missilePanel,
+                   text:"0/0",
+                   fontSize:Mathf.RoundToInt((profile.fontSize / 1.3f) * PluginConfig.globalFontScale.Value), 
+                   textColor:Color.white
+
+                   );
+            
+               profile.missileIndex.SetAnchorPivot(
+                   new(0, 1),
+                   new(0, 1),
+                   new(0, 1)
+                   );
+
+           } else
+           {
+               UIDraw.lastElement = null;
+           }
+
 
            
-            profile.missileIndex.SetAnchorPivot(
-                new(0, 1),
-                new(0, 1),
-                new(0, profile.leftPanelPivotYOffset)
-            );
 
+           // Missile Target 
+            
+            if (!PluginConfig.hideTargetName.Value)
+            {
+                profile.missileTargetName = new(
+
+                    newName: "missileTargetName",
+                    position: new(-5, -5),
+                    uiParent: profile.missilePanel,
+                    text: "No Target",
+                    fontSize: Mathf.RoundToInt((profile.fontSize / 1.5f) * PluginConfig.globalFontScale.Value),
+                    textColor: Color.white,
+                
+                    alignElement: false
+
+                    );
+
+                profile.missileTargetName.SetAnchorPivot(
+                    new(1, 1),
+                    new(1, 1),
+                    new(1, 1)
+                    );
+            }
+            else
+            {
+                UIDraw.lastElement = null;
+            }
+            
             
 
-            // Missile Target 
-
-            profile.missileTargetName = new(
-
-                name: "missileTargetName",
-                position: new(-5, -5),
-                UIParent: profile.missilePanel,
-                text: "No Target",
-                fontSize: Mathf.RoundToInt(profile.fontSize / 1.5f),
-                textColor: Color.white
-
-            );
-
-            profile.missileTargetName.SetAnchorPivot(
-                new(1, 1),
-                new(1, 1),
-                new(1, 1)
-            );
-
-
-
-
             // Missile Speed
+            
+            if (!PluginConfig.hideMissileSpeed.Value)
+            {
+                profile.missileSpeed = new(
 
-            profile.missileSpeed = new(
-
-                name: "missileSpeed",
-                position: new(-5, 0),
-                UIParent: profile.missilePanel,
-                text: "SPD ---",
-                fontSize: Mathf.RoundToInt(profile.fontSize / 1.5f)
+                    newName: "missileSpeed",
+                    position: new(-5, -5),
+                    uiParent: profile.missilePanel,
+                    text: "SPD ---",
+                    fontSize: Mathf.RoundToInt((profile.fontSize / 1.5f) * PluginConfig.globalFontScale.Value)
                
-                );
-
-            profile.missileSpeed.SetAnchorPivot(
-                new(1, 1),
-                new(1, 1),
-                new(1, profile.rightPanelPivotYOffset)
-                );
-
-    
-
+                    );
+                
+                profile.missileSpeed.SetAnchorPivot(
+                    new(1, 1),
+                    new(1, 1),
+                    new(1, 1)
+                    );
+            } 
+            
 
 
             // Missile Altitude
 
-            profile.missileAltitude = new(
+            if (!PluginConfig.hideMissileAltitude.Value)
+            {
+                profile.missileAltitude = new(
 
-                name: "missileAltitude",
-                position: new(-5, 0),
-                UIParent: profile.missilePanel,
-                text: "ALT ---",
-                fontSize: Mathf.RoundToInt(profile.fontSize / 1.5f)
-               
-                );
+                    newName: "missileAltitude",
+                    position: new(-5, -5),
+                    uiParent: profile.missilePanel,
+                    text: "ALT ---",
+                    fontSize: Mathf.RoundToInt((profile.fontSize / 1.5f) * PluginConfig.globalFontScale.Value)
 
-            profile.missileAltitude.SetAnchorPivot(
-                new(1, 1),
-                new(1, 1),
-                new(1, profile.rightPanelPivotYOffset + profile.rightPanelPivotYOffsetIncrement)
-            ); 
+                    );
 
-       
+                profile.missileAltitude.SetAnchorPivot(
+                    new(1, 1),
+                    new(1, 1),
+                    new(1, 1)
+                    );
+            } 
 
 
 
             // Missile Range
 
-            profile.missileRange = new(
+            if (!PluginConfig.hideMissileRange.Value)
+            {
 
-                name: "missileRange",
-                position: new(-5, 0),
-                UIParent: profile.missilePanel,
-                text: "RNG ---",
-                fontSize: Mathf.RoundToInt(profile.fontSize / 1.5f)
+                profile.missileRange = new(
 
-            );
+                    newName: "missileRange",
+                    position: new(-5, -5),
+                    uiParent: profile.missilePanel,
+                    text: "RNG ---",
+                    fontSize: Mathf.RoundToInt((profile.fontSize / 1.5f) * PluginConfig.globalFontScale.Value)
 
-            profile.missileRange.SetAnchorPivot(
-              new(1, 1),
-              new(1, 1),
-              new(1, profile.rightPanelPivotYOffset + profile.rightPanelPivotYOffsetIncrement * 2)
-             );
+                    );
 
-           
+                profile.missileRange.SetAnchorPivot(
+                    new(1, 1),
+                    new(1, 1),
+                    new(1, 1)
+                    );
+            }
 
             currentProfile = profile;
 
@@ -422,12 +461,17 @@ namespace MissileScreen.UI
 
         private static void CreateLockBoxCorner(Transform parent, Vector3 Scale, Vector2 anchor, Vector2 pivot)
         {
-            GameObject lockCorner = new();
-            lockCorner.name = "lockBoxCorner";
-            lockCorner.transform.parent = parent;
-            lockCorner.transform.localPosition = Vector3.zero;
-            lockCorner.transform.localRotation = Quaternion.Euler(0, 0, 0);
-            lockCorner.transform.localScale = Scale;
+            GameObject lockCorner = new()
+            {
+                name = "lockBoxCorner",
+                transform =
+                {
+                    parent = parent,
+                    localPosition = Vector3.zero,
+                    localRotation = Quaternion.Euler(0, 0, 0),
+                    localScale = Scale,
+                },
+            };
 
             lockCorner.AddComponent<Image>().sprite = PluginSprites.lockCornerSprite;
             lockCorner.GetComponent<Image>().color = PluginConfig.lockBoxColor.Value;

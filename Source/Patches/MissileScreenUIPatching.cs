@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using MissileScreen.UI;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 
 
@@ -37,6 +38,7 @@ namespace MissileScreen.Patches
                     var playerAircraft = GameUtils.GetAircraft();
                     if (aircraft == null || playerAircraft == null || aircraft != playerAircraft) return;
 
+                    ProfileManager.currentProfile = null;
 
                     if (PluginConfig.hmdMissileScreen.Value == false)
                     {
@@ -86,7 +88,7 @@ namespace MissileScreen.Patches
 
                             string finalErrCount = _errCount > 1 ? "x" + _errCount : "";
 
-                            Plugin.Logger.LogError($"Missile Screen Update Failure {finalErrCount} ({__instance.aircraft.definition.name}): {error.Message}{error.StackTrace}");
+                            Plugin.logger.LogError($"Missile Screen Update Failure {finalErrCount} ({__instance.aircraft.definition.name}): {error.Message}{error.StackTrace}");
                             
 
                             _timeSinceErr = _errorFrequency;
@@ -97,7 +99,14 @@ namespace MissileScreen.Patches
                 }
             }
 
-            
+            [HarmonyPatch(typeof(TacScreen), "OnDestroy")]
+            public class TacScreenDestroy
+            {
+                public static void Postfix(TacScreen __instance)
+                {
+                    ProfileManager.currentProfile = null;
+                }
+            }
            
             
         }
@@ -128,12 +137,12 @@ namespace MissileScreen.Patches
             }
 
 
-            if (MissilePatching.Missiles.Count > 0 && MissilePatching.currentMissileIndex < MissilePatching.Missiles.Count)
+            if (MissilePatching.missiles.Count > 0 && MissilePatching.currentMissileIndex < MissilePatching.missiles.Count)
             {
-                if (MissilePatching.Missiles[MissilePatching.currentMissileIndex] != null)
+                if (MissilePatching.missiles[MissilePatching.currentMissileIndex] != null)
                 {
 
-                    Missile currentMissile = MissilePatching.Missiles[MissilePatching.currentMissileIndex];
+                    Missile currentMissile = MissilePatching.missiles[MissilePatching.currentMissileIndex];
 
                     Camera missileCam = currentMissile.transform.GetComponentInChildren<Camera>(true);
 
@@ -258,22 +267,26 @@ namespace MissileScreen.Patches
 
 
 
-                        if (target != null)
+                        if (target != null )
                         {
-                            if (target.NetworkHQ == null)
+                            Color targetTeamColor = Color.white;; 
+                            
+                            if (ProfileManager.currentProfile.missileTargetName != null)
                             {
-                                ProfileManager.currentProfile.missileTargetName.SetColor(Color.white);
-                            }
-                            else
-                            {
-                                ProfileManager.currentProfile.missileTargetName.SetColor(target.NetworkHQ == GameUtils.GetPlayerTeam() ? GameAssets.i.HUDFriendly : GameAssets.i.HUDHostile);
-                            }
+                                if (target.NetworkHQ != null)
+                                {
+                                    targetTeamColor = target.NetworkHQ == GameUtils.GetPlayerTeam() ? GameAssets.i.HUDFriendly : GameAssets.i.HUDHostile;
+                                }
+                               
+                           
 
-                            ProfileManager.currentProfile.missileTargetName.SetText(target is Aircraft ? target.definition.unitName : target.unitName);
+                                ProfileManager.currentProfile.SetMissileTarget(target is Aircraft ? target.definition.unitName : target.unitName,targetTeamColor);
 
+                            }
+                            
                             float targetDistance = FastMath.Distance(targetPosition.ToGlobalPosition(), currentMissile.transform.GlobalPosition());
 
-                            ProfileManager.currentProfile.missileRange.SetText($"RNG {UnitConverter.DistanceReading(targetDistance)}");
+                            ProfileManager.currentProfile.SetMissileRange(targetDistance);
 
                             if (target.GetComponent<Rigidbody>() != null)
                             {
@@ -301,18 +314,20 @@ namespace MissileScreen.Patches
                         }
                         else
                         {
-                            ProfileManager.currentProfile.missileTargetName.SetColor(Color.white);
-                            ProfileManager.currentProfile.missileTargetName.SetText("No Target");
-                            ProfileManager.currentProfile.missileRange.SetText("RNG --");
+                           
+                            
+                            ProfileManager.currentProfile.SetMissileTarget("No Target");
+                            ProfileManager.currentProfile.SetMissileRange();
                             ProfileManager.currentProfile.leadIcon.SetActive(false);
 
                         }
 
                         currentMissile.UpdateRadarAlt();
-
-                        ProfileManager.currentProfile.missileIndex.SetText($"{MissilePatching.currentMissileIndex + 1}/{MissilePatching.Missiles.Count}");
-                        ProfileManager.currentProfile.missileSpeed.SetText($"SPD {UnitConverter.SpeedReading(Mathf.Round(currentMissile.speed))}");
-                        ProfileManager.currentProfile.missileAltitude.SetText($"ALT {UnitConverter.AltitudeReading(currentMissile.radarAlt)}");
+                        
+                        
+                        ProfileManager.currentProfile.SetMissileIndex(MissilePatching.currentMissileIndex, MissilePatching.missiles.Count,false);
+                        ProfileManager.currentProfile.SetMissileSpeed(currentMissile.speed);
+                        ProfileManager.currentProfile.SetMissileAltitude(currentMissile.radarAlt);
 
 
                         // Velocity Vector
@@ -359,7 +374,7 @@ namespace MissileScreen.Patches
 
                 // Create Missile Screen UI
                 
-                Plugin.Logger.LogDebug(mainInstance.name);
+                Plugin.logger.LogDebug(mainInstance.name);
 
                 ProfileManager.InjectProfileUI(useDefault ? "" : aircraft.definition.name, mainInstance);
 
@@ -368,16 +383,16 @@ namespace MissileScreen.Patches
                 
                 MissilePatching.DisableAllMissileCams();
                 MissilePatching.currentMissileIndex = 0;
-                MissilePatching.Missiles.Clear();
+                MissilePatching.missiles.Clear();
                 
                 ProfileManager.currentProfile.NoMissileDisplay();
 
-                Plugin.Logger.LogDebug("Loaded TacScreen");
+                Plugin.logger.LogDebug("Loaded TacScreen");
 
             }
             catch (System.Exception error)
             {
-                Plugin.Logger.LogError($"Failed to inject UI ({aircraft.definition.name}): {error.Message}\n{error.StackTrace}");
+                Plugin.logger.LogError($"Failed to inject UI ({aircraft.definition.name}): {error.Message}\n{error.StackTrace}");
             }
         }
         

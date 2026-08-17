@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,14 +7,18 @@ namespace MissileScreen.Source
 {
     public static class UIDraw
     {
+        public static UIElement lastElement;
+        
         public abstract class UIElement
         {
             protected GameObject gameObject;
             protected RectTransform rectTransform;
             protected Image imageComponent;
+            private string _name;
 
             protected UIElement(
-                string name,
+                
+                string newName,
                 Transform uiParent = null
 
                 )
@@ -23,29 +28,29 @@ namespace MissileScreen.Source
                 {
                     foreach (Transform child in uiParent)
                     {
-                        if (child.name == name)
-                        {
-                            gameObject = child.gameObject;
-                            rectTransform = gameObject.GetComponent<RectTransform>();
-                            imageComponent = gameObject.GetComponent<Image>();
-                            return;
-                        }
+                        if (child.name != newName) continue;
+
+                        gameObject = child.gameObject;
+                        rectTransform = gameObject.GetComponent<RectTransform>();
+                        imageComponent = gameObject.GetComponent<Image>();
+                        return;
                     }
                 }
                 // Create a new GameObject for the element
-                gameObject = new GameObject(name);
+                gameObject = new GameObject(newName);
                 gameObject.transform.SetParent(uiParent, false);
                 rectTransform = gameObject.AddComponent<RectTransform>();
+                
+                _name = newName;
 
-                return;
             }
 
-            public virtual void SetPosition(Vector2 position)
+            public void SetPosition(Vector2 position)
             {
                 rectTransform.anchoredPosition = position;
             }
 
-            public virtual Vector2 GetPosition()
+            public Vector2 GetPosition()
             {
                 return rectTransform.anchoredPosition;
             }
@@ -57,7 +62,9 @@ namespace MissileScreen.Source
 
             public void SetActive(bool active)
             {
-                gameObject.gameObject.SetActive(active);
+               
+                if (gameObject == null) return;
+                gameObject.SetActive(active);
             }
 
 
@@ -74,29 +81,30 @@ namespace MissileScreen.Source
 
         public class UILabel : UIElement
         {
-            private TextMeshProUGUI textComponent;
-            private float backgroundOpacity;
-
+            private TextMeshProUGUI _textComponent;
+            
             public UILabel(
-                string name,
+                string newName,
                 Vector2 position,
                 Transform uiParent = null,
                 string text = "",
                 int fontSize = 24,
-                TextAlignmentOptions fontAlignment = TextAlignmentOptions.Left ,// .MiddleLeft
-                Color? textColor = null
+                TextAlignmentOptions fontAlignment = TextAlignmentOptions.Left,
+                Color? textColor = null,
 
-                ) : base(name, uiParent)
+                bool alignElement = true
+                ) : base(newName, uiParent)
             {
-
+                float backgroundOpacity = 0.8f;
+                
                 imageComponent = gameObject.AddComponent<Image>();
-                this.backgroundOpacity = 0.8f;
+                
                 rectTransform.anchoredPosition = position;
                 rectTransform.sizeDelta = new Vector2(200, 40);
 
-                imageComponent.color = new Color(0, 0, 0, this.backgroundOpacity);
+                imageComponent.color = new Color(0, 0, 0, backgroundOpacity);
 
-                GameObject textObj = new("LabelText");
+                GameObject textObj = new GameObject("LabelText");
 
                 textObj.transform.SetParent(gameObject.transform, false);
                 RectTransform textRect = textObj.AddComponent<RectTransform>();
@@ -116,9 +124,24 @@ namespace MissileScreen.Source
                 
                 rectTransform.sizeDelta = new Vector2(textComp.preferredWidth, textComp.fontSize);
 
-                textComponent = textComp;
+                _textComponent = textComp;
+                
+                
+                if (lastElement != null && alignElement)
+                {
+                    Plugin.logger.LogDebug($"current: {newName} last: {lastElement.GetGameObject().name}");
+   
 
+                    RectTransform targetElementRect = lastElement.GetRectTransform();
 
+                    float alignedYPos = targetElementRect.anchoredPosition.y - targetElementRect.rect.height;
+                    
+                   
+                    
+                    rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x,alignedYPos);
+                }
+                lastElement = this;
+                
             }
 
             public void SetAnchorPivot(Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot)
@@ -130,32 +153,36 @@ namespace MissileScreen.Source
 
             public void SetText(string text)
             {
-                textComponent.text = text;
-                rectTransform.sizeDelta = new Vector2(textComponent.preferredWidth, textComponent.fontSize);
+                if (_textComponent && rectTransform)
+                {
+                    _textComponent.text = text;
+                    rectTransform.sizeDelta = new Vector2(_textComponent.preferredWidth, _textComponent.fontSize);
+                }
+
             }
 
             public override void SetColor(Color color)
             {
-                textComponent.color = color;
+                _textComponent.color = color;
 
             }
 
             public void SetFontSize(int size)
             {
-                textComponent.fontSize = size;
-                rectTransform.sizeDelta = new Vector2(textComponent.preferredWidth, textComponent.preferredHeight);
+                _textComponent.fontSize = size;
+                rectTransform.sizeDelta = new Vector2(_textComponent.preferredWidth, _textComponent.preferredHeight);
             }
 
             public void SetTextAlignment(TextAlignmentOptions alignment)
             {
-                textComponent.alignment = alignment;
+                _textComponent.alignment = alignment;
             }
 
 
 
             public Vector2 GetTextSize()
             {
-                return new Vector2(textComponent.preferredWidth, textComponent.preferredHeight);
+                return new Vector2(_textComponent.preferredWidth, _textComponent.preferredHeight);
             }
 
         }
@@ -165,7 +192,7 @@ namespace MissileScreen.Source
         {
             private Image _iconComponent;
             public UIImage(
-                string name,
+                string newName,
                 Transform uiParent,
                 Sprite sprite,
                 Color imageColor,
@@ -174,7 +201,7 @@ namespace MissileScreen.Source
                 Vector2? outlineThickness,
                 bool createOutline = false
 
-                ) : base(name, uiParent)
+                ) : base(newName, uiParent)
             {
                 _iconComponent = gameObject.AddComponent<Image>();
                 _iconComponent.transform.parent = uiParent;

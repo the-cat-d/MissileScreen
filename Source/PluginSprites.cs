@@ -21,7 +21,7 @@ namespace MissileScreen
             {
                 if (stream == null)
                 {
-                    Plugin.Logger.LogError($"Resource \"{resourceName}\" not found: " + resourcePath);
+                    Plugin.logger.LogError($"Resource \"{resourceName}\" not found: " + resourcePath);
                     return null;
                 }
 
@@ -32,7 +32,7 @@ namespace MissileScreen
                 tex.wrapMode = TextureWrapMode.Clamp;
                 if (ImageConversion.LoadImage(tex, imageData))
                 {
-                    Plugin.Logger.LogInfo($"{resourceName} Loaded");
+                    Plugin.logger.LogInfo($"{resourceName} Loaded");
                     return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
                 }
                 return null;
@@ -43,14 +43,14 @@ namespace MissileScreen
 
         public static void LoadSprites()
         {
-            Plugin.Logger.LogInfo("Loading Sprites...");    
+            Plugin.logger.LogInfo("Loading Sprites...");    
 
             attackSprite = LoadImageInStream("attackIcon.png");
             orientationSprite = LoadImageInStream("orientationIndicator.png");
             lockCornerSprite = LoadImageInStream("lockBoxCorner.png");
             leadSprite = LoadImageInStream("leadIcon.png");
 
-            Plugin.Logger.LogInfo("Sprites loaded successfully!");
+            Plugin.logger.LogInfo("Sprites loaded successfully!");
         }
     }
 }

@@ -11,7 +11,7 @@ namespace MissileScreen.Patches
     public static class MissilePatching
     {
 
-        public static readonly List<Missile> Missiles = new List<Missile>();
+        public static readonly List<Missile> missiles = [];
         public static int currentMissileIndex;
         private static  Camera _currentMissileCamera;
 
@@ -30,7 +30,7 @@ namespace MissileScreen.Patches
                     }
                     catch (System.Exception error)
                     {
-                        Plugin.Logger.LogError($"Error in MissilePatches.OnClusterDestroy: {error.Message}\nMissile: {__instance.gameObject.GetComponent<Missile>()}");
+                        Plugin.logger.LogError($"Error in MissilePatches.OnClusterDestroy: {error.Message}\nMissile: {__instance.gameObject.GetComponent<Missile>()}");
                     }
                 }
 
@@ -52,7 +52,7 @@ namespace MissileScreen.Patches
                         OnMissileStart(__instance);
                    } catch (System.Exception error)
                    {
-                        Plugin.Logger.LogError($"Missile Launch Error ({__instance.unitName}): {error.Message}{error.StackTrace}");
+                        Plugin.logger.LogError($"Missile Launch Error ({__instance.unitName}): {error.Message}{error.StackTrace}");
                    }
 
                 }
@@ -71,7 +71,7 @@ namespace MissileScreen.Patches
                     }
                     catch (System.Exception error)
                     {
-                        Plugin.Logger.LogError($"Missile Detonation Error ({__instance.unitName}): {error.Message}{error.StackTrace}");
+                        Plugin.logger.LogError($"Missile Detonation Error ({__instance.unitName}): {error.Message}{error.StackTrace}");
                     }
                 }
 
@@ -121,65 +121,92 @@ namespace MissileScreen.Patches
             {
                 return; // missile isnt owned by player
             }
-
+            
+            Plugin.logger.LogDebug("Finding camera...");
+            
             Camera missileCam = __instance.transform.GetComponentInChildren<Camera>(true);
-
+            
             if (missileCam == null) {
-                GameObject missileCamObj = new GameObject("missileCam", typeof(Camera));
-                missileCamObj.transform.parent = __instance.transform;
+                Plugin.logger.LogDebug("Camera not found creating...");
+                GameObject missileCamObj = new GameObject("missileCam", typeof(Camera))
+                {
+                    transform =
+                    {
+                        parent = __instance.transform,
+                    },
+                };
                 missileCam = missileCamObj.GetComponent<Camera>();
                 missileCam.transform.localRotation = Quaternion.identity;
+                Plugin.logger.LogDebug("Camera created");
 
             }
-
+            
             if (missileCam != null)
             {
-                if (Missiles.Count > 0 && currentMissileIndex <= Missiles.Count - 1)
+                
+                if (missiles.Count > 0 && currentMissileIndex <= missiles.Count - 1)
                 {
-
-                    Missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true).gameObject.SetActive(false); // Disable the camera of any previous missile to avoid lag
-
+                    Plugin.logger.LogDebug("Disabling previous camera...");
+                    if (missiles[currentMissileIndex] == null)
+                    {
+                        missiles.RemoveAt(currentMissileIndex);
+                        CycleMissileViewUp();
+                        return;
+                    }
+                    missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true).gameObject.SetActive(false); // Disable the camera of any previous missile to avoid lag
+                    Plugin.logger.LogDebug("Previous camera disabled");
                 }
-
+                
 
                 _currentMissileCamera = missileCam;
 
-                
+                Plugin.logger.LogDebug("Setting camera initial values...");
                 missileCam.farClipPlane = PluginConfig.cameraRenderDistance.Value;
                 missileCam.fieldOfView = PluginConfig.cameraFOV.Value;
                 missileCam.transform.localPosition = PluginConfig.missileCameraOffset.Value;
                 missileCam.transform.rotation = Quaternion.Euler(missileCam.transform.rotation.eulerAngles.x, missileCam.transform.rotation.eulerAngles.y, GameUtils.GetAircraft().transform.rotation.eulerAngles.z);
+                Plugin.logger.LogDebug("Camera values set up");
+                
+                Plugin.logger.LogDebug("setting camera volume layer...");
+                
+                UniversalAdditionalCameraData missileCamData = missileCam.GetComponent<UniversalAdditionalCameraData>();
 
-                UniversalAdditionalCameraData missileCamData;
-
-                if (!missileCam.TryGetComponent(out missileCamData))
+                if (missileCamData == null)
                 {
                     missileCamData = missileCam.gameObject.AddComponent<UniversalAdditionalCameraData>();
                 } 
 
                 missileCamData.renderPostProcessing = true;
                 missileCamData.volumeLayerMask = 256;
+                
+                Plugin.logger.LogDebug("camera volume layer set");
 
-                Component.Destroy(missileCam.GetComponent<AudioListener>());
+                if (missileCam.GetComponent<AudioListener>())
+                {
+                    Plugin.logger.LogDebug("AudioListener found");
+                    Component.Destroy(missileCam.GetComponent<AudioListener>());
+                    Plugin.logger.LogDebug("AudioListener destroyed");
+                }
 
                 
-
+                Plugin.logger.LogDebug("Setting camera target texture");
                 missileCam.targetTexture = MissileScreenUIPatching.renderTexture;
+                Plugin.logger.LogDebug("Camera target texture set");
 
                 missileCam.gameObject.SetActive(true);
                 ProfileManager.currentProfile.screen.SetActive(true);
            
-                ProfileManager.currentProfile.missileName.SetText(__instance.unitName);
+                ProfileManager.currentProfile.SetMissileName(__instance.unitName);
 
-                Missiles.Add(__instance);
+                missiles.Add(__instance);
 
-                currentMissileIndex = Missiles.Count - 1;
+                currentMissileIndex = missiles.Count - 1;
 
 
             }
 
 
-            Plugin.Logger.LogMessage("Missile Launched " + __instance.name);
+            Plugin.logger.LogMessage("Missile Launched " + __instance.name);
         }
 
         private static void OnDetonate(Missile __instance)
@@ -188,7 +215,7 @@ namespace MissileScreen.Patches
 
 
 
-            int removedIndex = Missiles.IndexOf(__instance);
+            int removedIndex = missiles.IndexOf(__instance);
 
             if (removedIndex == -1) return;
 
@@ -201,9 +228,9 @@ namespace MissileScreen.Patches
                 Object.Destroy(missileCam.gameObject);
             }
 
-            Missiles.Remove(__instance);
+            missiles.Remove(__instance);
 
-            if (Missiles.Count == 0)
+            if (missiles.Count == 0)
             {
                 currentMissileIndex = 0;
                 ProfileManager.currentProfile.NoMissileDisplay();
@@ -213,13 +240,13 @@ namespace MissileScreen.Patches
 
             if (wasViewing)
             {
-                if (removedIndex < Missiles.Count)
+                if (removedIndex < missiles.Count)
                 {
                     currentMissileIndex = removedIndex;
                 }
                 else
                 {
-                    currentMissileIndex = Missiles.Count - 1;
+                    currentMissileIndex = missiles.Count - 1;
                 }
 
                 ActivateMissile(currentMissileIndex);
@@ -231,7 +258,7 @@ namespace MissileScreen.Patches
 
 
 
-            Plugin.Logger.LogMessage("Missile Detonated " + __instance.name);
+            Plugin.logger.LogMessage("Missile Detonated " + __instance.name);
 
 
         }
@@ -239,36 +266,36 @@ namespace MissileScreen.Patches
 
         public static void ActivateMissile(int index)
         {
-            if (index < 0 || index >= Missiles.Count)
+            if (index < 0 || index >= missiles.Count)
             { return; }
 
-            Camera missileCam = Missiles[index].transform.GetComponentInChildren<Camera>(true);
+            Camera missileCam = missiles[index].transform.GetComponentInChildren<Camera>(true);
 
             if (missileCam != null)
             {
                 missileCam.targetTexture = MissileScreenUIPatching.renderTexture;
                 missileCam.gameObject.SetActive(true);
 
-                ProfileManager.currentProfile.missileName.SetText(Missiles[currentMissileIndex].unitName);
-                ProfileManager.currentProfile.missileIndex.SetActive(true);
-                ProfileManager.currentProfile.missileIndex.SetText($"{currentMissileIndex + 1}/{Missiles.Count}");
-               
+                ProfileManager.currentProfile.SetMissileName(missiles[currentMissileIndex].unitName);
+
+                ProfileManager.currentProfile.SetMissileIndex(currentMissileIndex, missiles.Count);
+
             }
         }
 
         public static void CycleMissileViewUp()
         {
            
-            Plugin.Logger.LogDebug($"count:{Missiles.Count}, index: {currentMissileIndex}");
-            if (currentMissileIndex >= 0 && currentMissileIndex < Missiles.Count)
+            Plugin.logger.LogDebug($"count:{missiles.Count}, index: {currentMissileIndex}");
+            if (currentMissileIndex >= 0 && currentMissileIndex < missiles.Count)
             {
                
-                if (Missiles[currentMissileIndex] != null)
+                if (missiles[currentMissileIndex] != null)
                 {
 
-                    Missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true).gameObject.SetActive(false);
+                    missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true).gameObject.SetActive(false);
 
-                    if (Missiles.Count == currentMissileIndex + 1)
+                    if (missiles.Count == currentMissileIndex + 1)
                     {
                         currentMissileIndex = 0;
                         ProfileManager.currentProfile.NoMissileDisplay();
@@ -280,15 +307,14 @@ namespace MissileScreen.Patches
                     }
 
                     
-                    Camera missileCam = Missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true);
+                    Camera missileCam = missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true);
 
                     if (missileCam != null)
                     {
                         missileCam.targetTexture = MissileScreenUIPatching.renderTexture;
                         missileCam.gameObject.SetActive(true);
-                        ProfileManager.currentProfile.missileName.SetText(Missiles[currentMissileIndex].unitName);
-                        ProfileManager.currentProfile.missileIndex.SetActive(true);
-                        ProfileManager.currentProfile.missileIndex.SetText($"{currentMissileIndex + 1}/{Missiles.Count}");
+                        ProfileManager.currentProfile.SetMissileName(missiles[currentMissileIndex].unitName);
+                        ProfileManager.currentProfile.SetMissileIndex(currentMissileIndex, missiles.Count);
                         ProfileManager.currentProfile.screen.SetActive(true);
                     }
 
@@ -301,37 +327,36 @@ namespace MissileScreen.Patches
         public static void CycleMissileViewDown()
         {
            
-            Plugin.Logger.LogDebug($"count:{Missiles.Count}, index: {currentMissileIndex}");
-            if (currentMissileIndex >= 0 && currentMissileIndex < Missiles.Count)
+            Plugin.logger.LogDebug($"count:{missiles.Count}, index: {currentMissileIndex}");
+            if (currentMissileIndex >= 0 && currentMissileIndex < missiles.Count)
             {
                
-                if (Missiles[currentMissileIndex] != null)
+                if (missiles[currentMissileIndex] != null)
                 {
 
-                    Missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true).gameObject.SetActive(false);
+                    missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true).gameObject.SetActive(false);
 
                     if (0 > currentMissileIndex - 1)
                     {
-                        currentMissileIndex = Missiles.Count - 1;
+                        currentMissileIndex = missiles.Count - 1;
                         ProfileManager.currentProfile.NoMissileDisplay();
 
                     }
                     else
                     {
                         currentMissileIndex--;
-                        currentMissileIndex = Mathf.Clamp(currentMissileIndex, 0, Missiles.Count - 1);
+                        currentMissileIndex = Mathf.Clamp(currentMissileIndex, 0, missiles.Count - 1);
                     }
 
                     
-                    Camera missileCam = Missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true);
+                    Camera missileCam = missiles[currentMissileIndex].transform.GetComponentInChildren<Camera>(true);
 
                     if (missileCam != null)
                     {
                         missileCam.targetTexture = MissileScreenUIPatching.renderTexture;
                         missileCam.gameObject.SetActive(true);
-                        ProfileManager.currentProfile.missileName.SetText(Missiles[currentMissileIndex].unitName);
-                        ProfileManager.currentProfile.missileIndex.SetActive(true);
-                        ProfileManager.currentProfile.missileIndex.SetText($"{currentMissileIndex + 1}/{Missiles.Count}");
+                        ProfileManager.currentProfile.SetMissileName(missiles[currentMissileIndex].unitName);
+                        ProfileManager.currentProfile.SetMissileIndex(currentMissileIndex, missiles.Count);
                         ProfileManager.currentProfile.screen.SetActive(true);
                     }
 
@@ -349,9 +374,14 @@ namespace MissileScreen.Patches
         public static void DisableAllMissileCams()
         {
             
-            for (int i = 0; i < Missiles.Count; i++)
+            for (int i = 0; i < missiles.Count; i++)
             {
-                var missileCam = Missiles[i].transform.GetComponentInChildren<Camera>(true);
+                if (missiles[i] == null)
+                {
+                    missiles.RemoveAt(i);
+                    return;
+                }
+                var missileCam = missiles[i].transform.GetComponentInChildren<Camera>(true);
                 if (missileCam != null)
                 {
                     

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MissileScreen
 {
@@ -20,7 +21,7 @@ namespace MissileScreen
             foreach (Transform child in parent)
             {
 
-                if (child.name.ToLower() == name.ToLower())
+                if (string.Equals(child.name, name, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return child;
                 }

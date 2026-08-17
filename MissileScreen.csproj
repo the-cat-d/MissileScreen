@@ -79,6 +79,9 @@
     <Reference Include="Unity.RenderPipelines.Universal.Shaders">
       <HintPath>E:\SteamLibrary\steamapps\common\Nuclear Option\NuclearOption_Data\Managed\Unity.RenderPipelines.Universal.Shaders.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>Assemblies\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
 	  <Aliases>Engine2</Aliases>
       <HintPath>E:\SteamLibrary\steamapps\common\Nuclear Option\NuclearOption_Data\Managed\UnityEngine.dll</HintPath>

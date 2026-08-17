@@ -52,10 +52,7 @@ namespace MissileScreen.UI
         public Vector2 missilePanelRectSize;
         public Quaternion missilePanelRectRotation = rotationDefault;
 
-        public float rightPanelPivotYOffset = 2.2f;
-        public float rightPanelPivotYOffsetIncrement = 1;
-
-        public float leftPanelPivotYOffset = 2.5f;
+     
 
         public float velocityVectorIconScale = 0.4f;
         public string replacePanelName = "weaponPanel";
@@ -75,29 +72,34 @@ namespace MissileScreen.UI
 
         public void ToggleElements(bool active)
         {
+            if (PluginConfig.hideNoMissile.Value)
+            {
+                missileName?.SetActive(active);
+            }
+            
+            velocityVector?.SetActive(active);
            
-            velocityVector.SetActive(active);
-           
-            lockBox.SetActive(active);
+            lockBox?.SetActive(active) ;
          
-            leadIcon.SetActive(active);
+            leadIcon?.SetActive(active);
 
            
-            missileIndex.SetActive(active);
-            missileSpeed.SetActive(active);
-            missileRange.SetActive(active);
-            missileAltitude.SetActive(active);
-            missileTargetName.SetActive(active);
+          
+            missileIndex?.SetActive(active);
+            
+            missileSpeed?.SetActive(active);
+            missileRange?.SetActive(active);
+            missileAltitude?.SetActive(active);
+            missileTargetName?.SetActive(active);
            
 
             if (hideGameObjects.Count > 0)
             {
-                foreach (var go in hideGameObjects)
+                foreach (GameObject go in hideGameObjects)
                 {
-                    if (go)
-                    {
-                        go.SetActive(!active);
-                    }
+
+                    go?.SetActive(!active);
+                    
                 }
             }
 
@@ -106,25 +108,76 @@ namespace MissileScreen.UI
 
         public  void NoMissileDisplay()
         {
+
+            if (PluginConfig.hideNoMissile.Value)
+            {
+                missileName?.SetActive(false);
+            }
+            else
+            {
+                missileName?.SetText("No Missile");
+            }
+
             
-            missileName.SetText("No Missile");
-            missileIndex.SetActive(false);
-            velocityVector.SetActive(false);
-            screen.SetActive(false);
+            missileIndex?.SetActive(false);
+            velocityVector?.SetActive(false);
+            screen?.SetActive(false);
 
             if (hideGameObjects.Count > 0)
             {
                 foreach (var go in hideGameObjects)
                 {
-                   if (go)
-                   {
-                        go.SetActive(true);
-                   }
+                 
+                    go?.SetActive(true);
+                   
                 }
             }
         }
 
-       
+        public void SetMissileName(string name)
+        {
+                missileName?.SetText(name);
+        }
+
+        public void SetMissileIndex(int index,int listCount,bool setActive=true)
+        {
+           
+                if (setActive) missileIndex?.SetActive(true);
+            
+                missileIndex?.SetText($"{index + 1}/{listCount}");
+            
+        }
+        
+        public void SetMissileSpeed(float speed)
+        {
+           
+                missileSpeed?.SetText($"SPD {UnitConverter.SpeedReading(Mathf.Round(speed))}");
+            
+        }
+        
+        public void SetMissileAltitude(float altitude)
+        {
+            missileAltitude?.SetText($"ALT {UnitConverter.AltitudeReading(altitude)}");
+        }
+        
+        public void SetMissileRange(float? targetDistance = null)
+        {
+            
+            
+            missileRange?.SetText(targetDistance != null ? $"RNG {UnitConverter.DistanceReading((float)targetDistance)}" : "RNG --");
+            
+        }
+        
+        public void SetMissileTarget(string name,Color? color = null)
+        {
+            if (missileTargetName != null)
+            {
+                missileTargetName.SetColor(color ?? Color.white);
+                missileTargetName.SetText(name);
+            }
+        }
+
+
       
 
     }
