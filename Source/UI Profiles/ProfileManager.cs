@@ -217,7 +217,7 @@ namespace MissileScreen.UI
 
             RawImage screenImage = profile.screen.AddComponent<RawImage>();
             screenImage.texture = MissileScreenUIPatching.renderTexture;
-            screenImage.color = Color.white;
+            screenImage.color = new(1, 1, 1, PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
 
             // Icons \\
 
@@ -381,8 +381,7 @@ namespace MissileScreen.UI
                 UIDraw.lastElement = null;
             }
             
-            
-
+          
             // Missile Speed
             
             if (!PluginConfig.hideMissileSpeed.Value)
@@ -404,7 +403,29 @@ namespace MissileScreen.UI
                     );
             } 
             
+            // Missile ToF
+            
+            if (!PluginConfig.hideMissileToF.Value)
+            {
+                profile.missileToF = new(
 
+                    newName: "missileToF",
+                    position: new(-5, -5),
+                    uiParent: profile.missilePanel,
+                    text: "ToF ---",
+                    fontSize: Mathf.RoundToInt((profile.fontSize / 1.5f) * PluginConfig.globalFontScale.Value)
+               
+                    );
+                
+                profile.missileToF.SetAnchorPivot(
+                    new(1, 1),
+                    new(1, 1),
+                    new(1, 1)
+                    );
+            } 
+
+
+            
 
             // Missile Altitude
 
@@ -474,7 +495,7 @@ namespace MissileScreen.UI
             };
 
             lockCorner.AddComponent<Image>().sprite = PluginSprites.lockCornerSprite;
-            lockCorner.GetComponent<Image>().color = PluginConfig.lockBoxColor.Value;
+            lockCorner.GetComponent<Image>().color = PluginConfig.lockBoxColor.Value * new Color(1,1,1,PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
             RectTransform cornerTLRect = lockCorner.GetComponent<RectTransform>();
             cornerTLRect.anchorMin = anchor;
             cornerTLRect.anchorMax = anchor;

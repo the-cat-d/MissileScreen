@@ -5,17 +5,7 @@ using MissileScreen.UI;
 
 namespace MissileScreen
 {
-    // TODO: should definitely turn off any missile camera that is active in missile launch error handling
-    // TODO: estimated flight time
-    // TODO: option to turn off individual icons (velocity vector and such)
-    // TODO: add more logging
-    // TODO: add a sound or an indicator that a missile successfully hit its target
-    // TODO: indicate when a missile is about to be intercepted (i.e show a indicator when a missile is being targeted)
-    // TODO: nuke info (i.e arming timer)
-    // TODO: someway to show missile pitch cleanly
-    // TODO: gmblr info (i.e distance till submunition jettison)
-    // TODO: use accessibility option custom colors for team colors
-    // TODO: more profile fine tuning
+ 
     
 
 
@@ -25,7 +15,7 @@ namespace MissileScreen
         
         public const string PLUGIN_GUID = "MissileScreen";
         public const string PLUGIN_NAME = "Missile Screen";
-        public const string PLUGIN_VERSION = "1.3.0";
+        public const string PLUGIN_VERSION = "2.0.0";
     }
 
 

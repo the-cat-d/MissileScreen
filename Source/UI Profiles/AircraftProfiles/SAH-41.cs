@@ -15,6 +15,7 @@ namespace MissileScreen.UI_Profiles.AircraftProfiles
             ProfileManager.AddProfile(new Profile
             {
                 replacePanelName = "BasicFlightInstrument",
+                hideGameObjectNames = ["BasicFlightInstrument"],
                 clearOldPanel = false,
 
                 lockboxMinSize = 42,

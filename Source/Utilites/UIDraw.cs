@@ -55,9 +55,9 @@ namespace MissileScreen.Source
                 return rectTransform.anchoredPosition;
             }
 
-            public virtual void SetColor(Color color)
+            public virtual void SetColor(Color? color = null)
             {
-                imageComponent.color = color;
+                imageComponent.color = (color ?? imageComponent.color) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
             }
 
             public void SetActive(bool active)
@@ -95,7 +95,7 @@ namespace MissileScreen.Source
                 bool alignElement = true
                 ) : base(newName, uiParent)
             {
-                float backgroundOpacity = 0.8f;
+                float backgroundOpacity = 0.8f * PluginConfig.hmdMissileScreenTransparency.Value;
                 
                 imageComponent = gameObject.AddComponent<Image>();
                 
@@ -116,7 +116,7 @@ namespace MissileScreen.Source
                 textComp.font = GetDefaultFont();
                 textComp.fontSize = fontSize;
                 textComp.fontStyle = FontStyles.Normal;
-                textComp.color = textColor ?? Color.white;
+                textComp.color = (textColor ?? Color.white) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
 
                 textComp.alignment = fontAlignment;
                 textComp.text = text;
@@ -161,26 +161,32 @@ namespace MissileScreen.Source
 
             }
 
-            public override void SetColor(Color color)
+            public override void SetColor(Color? color = null)
             {
-                _textComponent.color = color;
+                _textComponent.color = (color ?? _textComponent.color) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
 
             }
 
-            public void SetFontSize(int size)
+            public void UpdateBackgroundTransparency()
+            {
+                
+                imageComponent.color = new Color(0,0,0,0.8f * (PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1));
+            }
+             
+            public void SetFontSize(int size) // Unused
             {
                 _textComponent.fontSize = size;
                 rectTransform.sizeDelta = new Vector2(_textComponent.preferredWidth, _textComponent.preferredHeight);
             }
 
-            public void SetTextAlignment(TextAlignmentOptions alignment)
+            public void SetTextAlignment(TextAlignmentOptions alignment) // Unused
             {
                 _textComponent.alignment = alignment;
             }
 
 
 
-            public Vector2 GetTextSize()
+            public Vector2 GetTextSize() // Unused
             {
                 return new Vector2(_textComponent.preferredWidth, _textComponent.preferredHeight);
             }
@@ -211,7 +217,7 @@ namespace MissileScreen.Source
 
 
                 _iconComponent.sprite = sprite;
-                _iconComponent.color = imageColor;
+                _iconComponent.color = imageColor * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
 
                 if (!createOutline) return;
 
@@ -222,9 +228,9 @@ namespace MissileScreen.Source
 
             }
 
-            public void ChangeImageColor(Color newColor)
+            public void ChangeImageColor(Color? newColor = null)
             {
-                _iconComponent.color = newColor;
+                _iconComponent.color = (newColor ?? _iconComponent.color) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
             }
         }
 

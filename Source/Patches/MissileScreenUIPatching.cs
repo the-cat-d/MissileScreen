@@ -325,10 +325,13 @@ namespace MissileScreen.Patches
                         currentMissile.UpdateRadarAlt();
                         
                         
+
+                        ProfileManager.currentProfile.SetMissileToF(target,currentMissile);
+                        
                         ProfileManager.currentProfile.SetMissileIndex(MissilePatching.currentMissileIndex, MissilePatching.missiles.Count,false);
                         ProfileManager.currentProfile.SetMissileSpeed(currentMissile.speed);
                         ProfileManager.currentProfile.SetMissileAltitude(currentMissile.radarAlt);
-
+            
 
                         // Velocity Vector
                         Vector3 position = missileCam.transform.position + currentMissile.rb.velocity * 6;

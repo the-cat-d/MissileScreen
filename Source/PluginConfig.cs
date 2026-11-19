@@ -21,6 +21,7 @@ namespace MissileScreen
         public static ConfigEntry<bool> hmdMissileScreen;
         public static ConfigEntry<Vector2> hmdMissileScreenPosition;
         public static ConfigEntry<float> hmdMissileScreenScale;
+        public static ConfigEntry<float> hmdMissileScreenTransparency;
         
         
         public static ConfigEntry<float> globalFontScale;
@@ -32,6 +33,7 @@ namespace MissileScreen
         public static ConfigEntry<bool> hideMissileName;
         public static ConfigEntry<bool> hideMissileIndex;
         public static ConfigEntry<bool> hideTargetName;
+        public static ConfigEntry<bool> hideMissileToF;
         public static ConfigEntry<bool> hideMissileSpeed;
         public static ConfigEntry<bool> hideMissileAltitude;
         public static ConfigEntry<bool> hideMissileRange;
@@ -147,6 +149,21 @@ namespace MissileScreen
                 
             };
             
+            hmdMissileScreenTransparency = config.Bind(
+                "UI Config - HMD",
+                "HMD Missile Screen Transparency",
+                1f,
+                new ConfigDescription("Transparency of the missile screen panel. This only affects the HMD missile screen and will need reloading for changes to apply" , 
+                    new AcceptableValueRange<float>(0,1)
+                    )
+                );
+
+            // hmdMissileScreenTransparency.SettingChanged += (_, _) =>
+            // {
+            //     
+            //     if (ProfileManager.currentProfile != null) ProfileManager.currentProfile.UpdateElementsColor();
+            //     
+            // };
             
             // Colors
             
@@ -255,12 +272,21 @@ namespace MissileScreen
                 "Hides the text that shows the index of the current missile in the list of active missiles. Requires aircraft change to apply changes."
                 );
             
+
             hideMissileSpeed  = config.Bind(
                 "UI Config - Elements",
                 "Hide Missile Speed",
                 false,
                 "Hides the text that shows the speed of the currently shown missile. Requires aircraft change to apply changes."
                 );
+            
+            hideMissileToF  = config.Bind(
+                "UI Config - Elements",
+                "Hide Missile ToF (Time of Flight)",
+                false,
+                "Hides the text that shows the ToF of the currently shown missile to its target. Requires aircraft change to apply changes."
+                );
+
             
             hideMissileAltitude  = config.Bind(
                 "UI Config - Elements",
