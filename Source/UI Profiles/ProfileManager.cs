@@ -92,8 +92,8 @@ namespace MissileScreen.UI
             profile.weaponPanel = GameUtils.FindChildRecursive(mainInterface.transform,profile.replacePanelName);
 
             if (profile.weaponPanel == null && PluginConfig.hmdMissileScreen.Value == false)
-            {
-
+            { 
+                Plugin.logger.LogError($"Couldn't find Panel \"{aircraftName}\" ");
                 return; // If the plane doesn't have the panel, then exit
 
             }
@@ -455,8 +455,8 @@ namespace MissileScreen.UI
 
         }
        
-
-
+        
+    
 
 
         private static void CreateLockBoxCorner(Transform parent, Vector3 Scale, Vector2 anchor, Vector2 pivot)

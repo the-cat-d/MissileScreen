@@ -367,26 +367,35 @@ namespace MissileScreen.Patches
 
         private static void InitUI(Unit aircraft, GameObject mainInstance,bool useDefault = false)
         {
+            Plugin.logger.LogInfo($"Trying to initialize UI... ({aircraft.definition.name})");
+           
+                
+            
             try
             {
                 isPlaneCompatible = false;
-
-
+                
+                if (ProfileManager.currentProfile != null) ProfileManager.currentProfile.Destroy();
+                ProfileManager.currentProfile = null;
+                
                 // Create Missile Screen UI
                 
                 Plugin.logger.LogDebug(mainInstance.name);
-
+                
+                
                 ProfileManager.InjectProfileUI(useDefault ? "" : aircraft.definition.name, mainInstance);
 
 
                 // Clear missile data on start up
                 
-                MissilePatching.DisableAllMissileCams();
+                MissilePatching.DisableAllMissileCams(); 
                 MissilePatching.currentMissileIndex = 0;
                 MissilePatching.missiles.Clear();
                 
-                ProfileManager.currentProfile.NoMissileDisplay();
-
+                if (ProfileManager.currentProfile != null) ProfileManager.currentProfile.NoMissileDisplay();
+                
+                Plugin.logger.LogDebug(ProfileManager.currentProfile.screen);
+                
                 Plugin.logger.LogDebug("Loaded TacScreen");
 
             }

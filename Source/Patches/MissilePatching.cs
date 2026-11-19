@@ -23,7 +23,7 @@ namespace MissileScreen.Patches
             {
                 static void Postfix(SubmunitionDispenser __instance)
                 {
-                    
+
                     try
                     {
                         OnDetonate(__instance.gameObject.GetComponent<Missile>());

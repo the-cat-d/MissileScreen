@@ -98,7 +98,7 @@ namespace MissileScreen.UI
                 foreach (GameObject go in hideGameObjects)
                 {
 
-                    go?.SetActive(!active);
+                    if (go) go.SetActive(!active);
                     
                 }
             }
@@ -121,14 +121,14 @@ namespace MissileScreen.UI
             
             missileIndex?.SetActive(false);
             velocityVector?.SetActive(false);
-            screen?.SetActive(false);
+            if (screen) screen.SetActive(false);
 
             if (hideGameObjects.Count > 0)
             {
-                foreach (var go in hideGameObjects)
+                foreach (GameObject go in hideGameObjects)
                 {
                  
-                    go?.SetActive(true);
+                    if(go) go.SetActive(true);
                    
                 }
             }
@@ -178,7 +178,10 @@ namespace MissileScreen.UI
         }
 
 
-      
+        public void Destroy()
+        {
+            Object.Destroy(missilePanel);
+        }
 
     }
 }
