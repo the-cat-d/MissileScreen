@@ -149,6 +149,80 @@ namespace MissileScreen.UI
                 missileIndex?.SetText($"{index + 1}/{listCount}");
             
         }
+
+        
+        
+        
+
+        private static string FormatTime(float time)
+        {
+            if (float.IsInfinity(time) || float.IsNegative(time))
+            {
+                return "--:--";
+            }
+            
+            int minutes = Mathf.FloorToInt(time / 60);
+            int seconds = Mathf.FloorToInt(time % 60);
+            
+            return $"{minutes:00}:{seconds:00}";
+        }
+
+        private static float CalculateETA(Vector3 targetPos, Vector3 missilePos,Vector3 missileVel, Vector3 targetVel)
+        {
+            float targetDistance = Vector3.Distance(targetPos,  missilePos);
+            Vector3 targetNormalDir = (targetPos - missilePos) / targetDistance;
+
+            Vector3 relativeVelocity =  missileVel -targetVel;
+            float closingSpeed = Vector3.Dot(relativeVelocity, targetNormalDir);
+            
+            return targetDistance / closingSpeed;
+            
+        }
+        
+        public void SetMissileToF(Unit target, Missile missile)
+        {
+            WeaponInfo missileInfo = missile.GetWeaponInfo();
+            OpticalSeekerBomb seeker = missile.seeker as OpticalSeekerBomb;
+            
+            if (missileInfo.nuclear && seeker)
+            {
+                missileToF?.SetText(missile.timeSinceSpawn <= seeker.armDelay ? $"ToD {Mathf.Floor(missile.timeSinceSpawn)}/{seeker.armDelay}" : "ToD --/--");
+            }
+            else
+            {
+                float eta;
+            
+                if (target)
+                {
+                    eta = CalculateETA(target.transform.position, missile.transform.position, missile.rb.velocity, missile.targetVel);
+
+                } else if (missileInfo.bomb || missileInfo.laserGuided || missileInfo.glideBomb)
+                {
+                    
+
+                    if (Physics.Raycast(missile.transform.position, missile.rb.velocity.normalized, out RaycastHit pip, Mathf.Infinity,~PhysicsLayers.IgnoreCollisions))
+                    {
+                        SetMissileRange(Vector3.Distance(missile.transform.position,pip.point));
+                        eta = CalculateETA(pip.point, missile.transform.position, missile.rb.velocity,missile.targetVel );
+                    }
+                    else
+                    {
+                        eta = -1;
+                    }
+                    
+                    
+                }
+                else
+                {
+                    eta = -1;
+                }
+            
+            
+                missileToF?.SetText(eta > 0 ? $"ToF {FormatTime(eta)}" : "ToF --:--");
+            }
+            
+           
+        }
         
         private Vector3 lastTargetPosition = Vector3.zero;
 

@@ -326,10 +326,10 @@ namespace MissileScreen.Patches
                         
                         
 
-                        ProfileManager.currentProfile.SetMissileToF(target,currentMissile);
                         
                         ProfileManager.currentProfile.SetMissileIndex(MissilePatching.currentMissileIndex, MissilePatching.missiles.Count,false);
                         ProfileManager.currentProfile.SetMissileSpeed(currentMissile.speed);
+                        ProfileManager.currentProfile.SetMissileToF(target,currentMissile);
                         ProfileManager.currentProfile.SetMissileAltitude(currentMissile.radarAlt);
             
 
