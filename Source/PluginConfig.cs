@@ -15,7 +15,8 @@ namespace MissileScreen
 
         public static ConfigEntry<int> cameraFOV;
         public static ConfigEntry<int> cameraRenderDistance;
-
+        public static ConfigEntry<bool> changeToNewMissile;
+        
         // UI Config
 
         public static ConfigEntry<bool> hmdMissileScreen;
@@ -84,6 +85,7 @@ namespace MissileScreen
 
 
             // Camera Config
+
             
             cameraFOV = config.Bind(
                 "Camera Config",
@@ -310,6 +312,13 @@ namespace MissileScreen
                 );
             
             // Misc Config
+            
+            changeToNewMissile = config.Bind(
+                "Misc",
+                "Always Change To Newest Missile",
+                true,
+                "Automatically switch to the newest active missile if enabled, if not it will stay on the missile that's being currently viewed"
+                );
             
             hideNoMissile =config.Bind(
                 "Misc",

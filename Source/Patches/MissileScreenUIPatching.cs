@@ -325,8 +325,6 @@ namespace MissileScreen.Patches
                         currentMissile.UpdateRadarAlt();
                         
                         
-
-                        
                         ProfileManager.currentProfile.SetMissileIndex(MissilePatching.currentMissileIndex, MissilePatching.missiles.Count,false);
                         ProfileManager.currentProfile.SetMissileSpeed(currentMissile.speed);
                         ProfileManager.currentProfile.SetMissileToF(target,currentMissile);
