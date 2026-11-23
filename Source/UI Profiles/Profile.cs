@@ -1,6 +1,8 @@
 ﻿using MissileScreen.Source;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 namespace MissileScreen.UI
@@ -33,14 +35,15 @@ namespace MissileScreen.UI
         public UIDraw.UIImage leadIcon;
 
         public GameObject lockBox;
-
+        public readonly List<Image> lockboxCorners = [];
 
         // Misc
 
 
         public Transform weaponPanel;
         public Transform missilePanel;
-
+        public RawImage screenImage;
+        
         public Vector2 missilePanelSize;
 
         // Hides a specific game object from the TacScreen when the missile is active.
@@ -223,40 +226,7 @@ namespace MissileScreen.UI
             
            
         }
-        
-        private Vector3 lastTargetPosition = Vector3.zero;
-
-        private string FormatTime(float time)
-        {
-            if (float.IsInfinity(time))
-            {
-                return "--:--";
-            }
-            
-            int minutes = Mathf.FloorToInt(time / 60);
-            int seconds = Mathf.FloorToInt(time % 60);
-            return $"{minutes:00}:{seconds:00}";
-        }
-        
-        public void SetMissileToF(Unit target, Missile missile)
-        {
-            float ETA = 0;
-            
-            if (target)
-            {
-                float targetDistance = Vector3.Distance(target.transform.position,  missile.transform.position);
-                Vector3 targetNormalDir = (target.transform.position - missile.transform.position) / targetDistance;
-
-                Vector3 relativeVelocity =  missile.rb.velocity - missile.targetVel;
-                float closingSpeed = Vector3.Dot(relativeVelocity, targetNormalDir);
-
-                ETA = targetDistance / closingSpeed;
-                
-            }
-            
-            
-            missileToF?.SetText(target ? $"ToF {FormatTime(ETA)}" : "ToF --:--");
-        }
+       
         
         public void SetMissileSpeed(float speed)
         {
@@ -286,18 +256,29 @@ namespace MissileScreen.UI
             }
         }
 
-        // public void UpdateElementsColor()
-        // {
-        //     missileName.SetColor();
-        //     missileTargetName.SetColor();
-        //     missileIndex.SetColor();
-        //     missileSpeed.SetColor();
-        //     missileRange.SetColor();
-        //     missileAltitude.SetColor();
-        //     velocityVector.SetColor();
-        //     orientationIndicator.SetColor();
-        //     leadIcon.SetColor();
-        // }
+        public void UpdateElementsColor()
+        {
+            Plugin.logger.LogDebug(missileRange == null);
+            missileName?.SetColor();
+            missileTargetName?.SetColor();
+            missileIndex?.SetColor();
+            missileSpeed?.SetColor();
+            missileToF?.SetColor();
+            missileRange?.SetColor();
+            missileAltitude?.SetColor();
+            velocityVector?.SetColor();
+            orientationIndicator?.SetColor();
+            leadIcon?.SetColor();
+            velocityVector?.SetColor();
+
+            foreach (Image lockboxImage in lockboxCorners.Where(lockboxImage => lockboxImage))
+            {
+                lockboxImage.color = PluginConfig.lockBoxColor.Value.WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
+            }
+            
+            if (screenImage) screenImage.color = new(1, 1, 1, PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
+            
+        }
 
         public void Destroy()
         {

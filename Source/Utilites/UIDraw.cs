@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 namespace MissileScreen.Source
@@ -57,7 +58,7 @@ namespace MissileScreen.Source
 
             public virtual void SetColor(Color? color = null)
             {
-                imageComponent.color = (color ?? imageComponent.color) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
+                imageComponent.color = (color ?? imageComponent.color).WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
             }
 
             public void SetActive(bool active)
@@ -116,7 +117,7 @@ namespace MissileScreen.Source
                 textComp.font = GetDefaultFont();
                 textComp.fontSize = fontSize;
                 textComp.fontStyle = FontStyles.Normal;
-                textComp.color = (textColor ?? Color.white) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
+                textComp.color = (textColor ?? Color.white).WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
 
                 textComp.alignment = fontAlignment;
                 textComp.text = text;
@@ -163,11 +164,13 @@ namespace MissileScreen.Source
 
             public override void SetColor(Color? color = null)
             {
-                _textComponent.color = (color ?? _textComponent.color) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
+                if (!_textComponent) return;
+                UpdateBackgroundTransparency();
+                _textComponent.color = (color ?? _textComponent.color).WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
 
             }
 
-            public void UpdateBackgroundTransparency()
+            private void UpdateBackgroundTransparency()
             {
                 
                 imageComponent.color = new Color(0,0,0,0.8f * (PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1));
@@ -217,7 +220,7 @@ namespace MissileScreen.Source
 
 
                 _iconComponent.sprite = sprite;
-                _iconComponent.color = imageColor * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
+                _iconComponent.color = imageColor.WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
 
                 if (!createOutline) return;
 
@@ -228,9 +231,9 @@ namespace MissileScreen.Source
 
             }
 
-            public void ChangeImageColor(Color? newColor = null)
+            public override void SetColor(Color? newColor = null)
             {
-                _iconComponent.color = (newColor ?? _iconComponent.color) * (PluginConfig.hmdMissileScreen.Value ? new Color(1,1,1,PluginConfig.hmdMissileScreenTransparency.Value) : Color.white);
+                _iconComponent.color = (newColor ?? _iconComponent.color).WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
             }
         }
 

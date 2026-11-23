@@ -5,10 +5,7 @@ using MissileScreen.UI;
 
 namespace MissileScreen
 {
- 
     
-
-
 
     public static class PluginInfo
     {

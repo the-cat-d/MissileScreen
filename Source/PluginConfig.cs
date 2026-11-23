@@ -153,17 +153,17 @@ namespace MissileScreen
                 "UI Config - HMD",
                 "HMD Missile Screen Transparency",
                 1f,
-                new ConfigDescription("Transparency of the missile screen panel. This only affects the HMD missile screen and will need reloading for changes to apply" , 
+                new ConfigDescription("Transparency of the missile screen panel. This only affects the HMD missile screen" , 
                     new AcceptableValueRange<float>(0,1)
                     )
                 );
 
-            // hmdMissileScreenTransparency.SettingChanged += (_, _) =>
-            // {
-            //     
-            //     if (ProfileManager.currentProfile != null) ProfileManager.currentProfile.UpdateElementsColor();
-            //     
-            // };
+            hmdMissileScreenTransparency.SettingChanged += (_, _) =>
+            {
+                
+                if (ProfileManager.currentProfile != null) ProfileManager.currentProfile?.UpdateElementsColor();
+                
+            };
             
             // Colors
             

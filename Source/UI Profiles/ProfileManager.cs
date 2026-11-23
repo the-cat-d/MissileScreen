@@ -215,9 +215,9 @@ namespace MissileScreen.UI
             screenRect.sizeDelta = Vector2.zero;
 
 
-            RawImage screenImage = profile.screen.AddComponent<RawImage>();
-            screenImage.texture = MissileScreenUIPatching.renderTexture;
-            screenImage.color = new(1, 1, 1, PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
+            profile.screenImage = profile.screen.AddComponent<RawImage>();
+            profile.screenImage.texture = MissileScreenUIPatching.renderTexture;
+            profile.screenImage.color = new(1, 1, 1, PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
 
             // Icons \\
 
@@ -283,11 +283,11 @@ namespace MissileScreen.UI
             profile.lockBox.GetComponent<RectTransform>().sizeDelta = new(profile.lockboxMinSize, profile.lockboxMinSize);
 
 
-            CreateLockBoxCorner(profile.lockBox.transform, new(profile.lockboxCornerScale, profile.lockboxCornerScale, 0), new(0, 1), new(0, 1));
-            CreateLockBoxCorner(profile.lockBox.transform, new(-profile.lockboxCornerScale, profile.lockboxCornerScale, 0), new(1, 1), new(0, 1));
+            CreateLockBoxCorner(profile.lockBox.transform, new(profile.lockboxCornerScale, profile.lockboxCornerScale, 0), new(0, 1), new(0, 1),profile);
+            CreateLockBoxCorner(profile.lockBox.transform, new(-profile.lockboxCornerScale, profile.lockboxCornerScale, 0), new(1, 1), new(0, 1),profile);
 
-            CreateLockBoxCorner(profile.lockBox.transform, new(-profile.lockboxCornerScale, -profile.lockboxCornerScale, 0), new(1, 0), new(0, 1));
-            CreateLockBoxCorner(profile.lockBox.transform, new(profile.lockboxCornerScale, -profile.lockboxCornerScale, 0), new(0, 0), new(0, 1));
+            CreateLockBoxCorner(profile.lockBox.transform, new(-profile.lockboxCornerScale, -profile.lockboxCornerScale, 0), new(1, 0), new(0, 1),profile);
+            CreateLockBoxCorner(profile.lockBox.transform, new(profile.lockboxCornerScale, -profile.lockboxCornerScale, 0), new(0, 0), new(0, 1),profile);
 
 
             
@@ -480,7 +480,7 @@ namespace MissileScreen.UI
     
 
 
-        private static void CreateLockBoxCorner(Transform parent, Vector3 Scale, Vector2 anchor, Vector2 pivot)
+        private static void CreateLockBoxCorner(Transform parent, Vector3 Scale, Vector2 anchor, Vector2 pivot, Profile profile)
         {
             GameObject lockCorner = new()
             {
@@ -494,8 +494,9 @@ namespace MissileScreen.UI
                 },
             };
 
-            lockCorner.AddComponent<Image>().sprite = PluginSprites.lockCornerSprite;
-            lockCorner.GetComponent<Image>().color = PluginConfig.lockBoxColor.Value * new Color(1,1,1,PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
+            Image lockboxImage =  lockCorner.AddComponent<Image>();
+            lockboxImage.sprite = PluginSprites.lockCornerSprite;
+            lockboxImage.color = PluginConfig.lockBoxColor.Value.WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
             RectTransform cornerTLRect = lockCorner.GetComponent<RectTransform>();
             cornerTLRect.anchorMin = anchor;
             cornerTLRect.anchorMax = anchor;
@@ -503,6 +504,8 @@ namespace MissileScreen.UI
             Outline lockCornerOutline = lockCorner.AddComponent<Outline>();
             lockCornerOutline.effectColor = PluginConfig.lockBoxOutlineColor.Value;
             lockCornerOutline.effectDistance = new(PluginConfig.lockBoxOutlineThickness.Value, PluginConfig.lockBoxOutlineThickness.Value);
+            
+            profile.lockboxCorners.Add(lockboxImage);
         }
 
     }
