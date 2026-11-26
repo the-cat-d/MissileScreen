@@ -137,6 +137,9 @@ namespace MissileScreen.Patches
                 };
                 missileCam = missileCamObj.GetComponent<Camera>();
                 missileCam.transform.localRotation = Quaternion.identity;
+                
+                missileCam.gameObject.SetActive(false);
+                
                 Plugin.logger.LogDebug("Camera created");
 
             }
