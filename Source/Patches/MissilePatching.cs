@@ -172,7 +172,7 @@ namespace MissileScreen.Patches
                 missileCam.farClipPlane = PluginConfig.cameraRenderDistance.Value;
                 missileCam.fieldOfView = PluginConfig.cameraFOV.Value;
                 missileCam.transform.localPosition = PluginConfig.missileCameraOffset.Value;
-                missileCam.transform.rotation = Quaternion.Euler(missileCam.transform.rotation.eulerAngles.x, missileCam.transform.rotation.eulerAngles.y, GameUtils.GetAircraft().transform.rotation.eulerAngles.z);
+                missileCam.transform.rotation = Quaternion.Euler(missileCam.transform.rotation.eulerAngles.x, missileCam.transform.rotation.eulerAngles.y, 0);
                 Plugin.logger.LogDebug("Camera values set up");
                 
                 Plugin.logger.LogDebug("setting camera volume layer...");

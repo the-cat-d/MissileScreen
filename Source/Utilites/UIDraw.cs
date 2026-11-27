@@ -196,7 +196,115 @@ namespace MissileScreen.Source
 
         }
 
+        public class UIText : UIElement
+        {
+            private TextMeshProUGUI _textComponent;
+            
+            public UIText(
+                string newName,
+                Transform uiParent = null,
+                string text = "",
+                Color? textColor = null,
+                int fontSize = 24,
+                float outlineThickness = 1,
+                Color? outlineColor = null
+                
+                ) : base(newName, uiParent)
+            {
+                
+                
+                rectTransform.anchoredPosition = Vector2.zero;
+                rectTransform.sizeDelta = new Vector2(200, 40);
+                
 
+                GameObject textObj = new GameObject("Text");
+
+                textObj.transform.SetParent(gameObject.transform, false);
+                RectTransform textRect = textObj.AddComponent<RectTransform>();
+                textRect.anchorMin = Vector2.zero;
+                textRect.anchorMax = Vector2.one;
+                textRect.offsetMin = Vector2.zero;
+                textRect.offsetMax = Vector2.zero;
+                TextMeshProUGUI textComp = textObj.AddComponent<TextMeshProUGUI>();
+                textComp.font = GetDefaultFont();
+                textComp.fontSize = fontSize;
+                textComp.fontStyle = FontStyles.Normal;
+                textComp.color = (textColor ?? Color.white).WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
+                
+                textComp.fontMaterial.SetFloat(ShaderUtilities.ID_OutlineWidth,outlineThickness / 5f);
+                textComp.fontMaterial.SetColor(ShaderUtilities.ID_OutlineColor,outlineColor ?? Color.black);
+                textComp.fontMaterial.SetFloat(ShaderUtilities.ID_FaceDilate,outlineThickness / 5f);
+
+                Outline outline = gameObject.AddComponent<Outline>();
+                outline.effectColor = outlineColor ?? Color.green;
+                outline.effectDistance = new (outlineThickness, outlineThickness);
+                
+                
+                textComp.alignment = TextAlignmentOptions.Center;
+                textComp.text = text;
+                textComp.overflowMode = TextOverflowModes.Overflow;
+                
+                rectTransform.sizeDelta = new Vector2(textComp.preferredWidth, textComp.fontSize);
+
+                _textComponent = textComp;
+                
+                
+               
+                
+            }
+
+            public void SetAnchorPivot(Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot)
+            {
+                rectTransform.anchorMin = anchorMin;
+                rectTransform.anchorMax = anchorMax;
+                rectTransform.pivot = pivot;
+            }
+
+            public void SetText(string text)
+            {
+                if (_textComponent && rectTransform)
+                {
+                    _textComponent.text = text;
+                    rectTransform.sizeDelta = new Vector2(_textComponent.preferredWidth, _textComponent.fontSize);
+                }
+
+            }
+
+            public override void SetColor(Color? color = null)
+            {
+                if (!_textComponent) return;
+                _textComponent.color = (color ?? _textComponent.color).WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
+
+            }
+
+          
+            public void SetFontSize(int size) // Unused
+            {
+                _textComponent.fontSize = size;
+                rectTransform.sizeDelta = new Vector2(_textComponent.preferredWidth, _textComponent.preferredHeight);
+            }
+
+            public void SetTextAlignment(TextAlignmentOptions alignment) // Unused
+            {
+                _textComponent.alignment = alignment;
+            }
+
+
+
+            public Vector2 GetTextSize() // Unused
+            {
+                return new Vector2(_textComponent.preferredWidth, _textComponent.preferredHeight);
+            }
+
+        }
+        
+        public class UILadderRung(float degree, string newName, Transform uiParent = null, string text = "", Color? textColor = null, int fontSize = 24) : UIText(newName, uiParent, text, textColor, fontSize, PluginConfig.pitchIndicatorOutlineThickness.Value, PluginConfig.pitchIndicatorOutlineColor.Value)
+        { 
+            public readonly float degree = degree;
+
+        }
+        
+        
         public class UIImage : UIElement
         {
             private Image _iconComponent;

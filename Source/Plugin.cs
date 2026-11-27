@@ -2,6 +2,9 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using MissileScreen.UI;
+using System;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace MissileScreen
 {
@@ -56,6 +59,14 @@ namespace MissileScreen
             logger.LogInfo($"{PluginInfo.PLUGIN_GUID} Loaded");
         }
 
+        // private void Update()
+        // {
+        //     if (ProfileManager.currentProfile != null && ProfileManager.currentProfile.missilePanel.gameObject.GetComponent<Image>() == null)
+        //     {
+        //         Plugin.logger.LogWarning(Time.timeSinceLevelLoad);
+        //         ProfileManager.currentProfile.missilePanel.gameObject.AddComponent<Image>(); 
+        //     }
+        // }
 
         private void OnDestroy()
         {

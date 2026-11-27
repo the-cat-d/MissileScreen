@@ -264,7 +264,9 @@ namespace MissileScreen.Patches
                         }
 
 
-
+                        // Pitch Indicator
+                        
+                        ProfileManager.currentProfile.UpdatePitchIndicator(missileCam.transform);
 
 
                         if (target != null )
@@ -341,7 +343,7 @@ namespace MissileScreen.Patches
 
                         // Orientation Indicator
 
-                        ProfileManager.currentProfile.orientationIndicator.GetGameObject().transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
+                        ProfileManager.currentProfile.orientationIndicator?.GetGameObject().transform.localRotation = Quaternion.Euler(0, 0, -missileCam.transform.rotation.eulerAngles.z);
 
 
 
@@ -370,8 +372,7 @@ namespace MissileScreen.Patches
         {
             Plugin.logger.LogInfo($"Trying to initialize UI... ({aircraft.definition.name})");
            
-                
-            
+
             try
             {
                 isPlaneCompatible = false;

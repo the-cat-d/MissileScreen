@@ -86,7 +86,7 @@ namespace MissileScreen.UI
             
             if (foundPanelHUD)
             {
-                GameObject.Destroy(foundPanelHUD.gameObject);
+                Object.Destroy(foundPanelHUD.gameObject);
             }
 
             profile.weaponPanel = GameUtils.FindChildRecursive(mainInterface.transform,profile.replacePanelName);
@@ -124,8 +124,8 @@ namespace MissileScreen.UI
 
                 foreach (Component component in profile.missilePanel.GetComponents<Component>())
                 {
-                    if (component is not RectTransform && component is not CanvasRenderer) {
-                        Component.Destroy(component);
+                    if (component is not RectTransform && component is not CanvasRenderer && component is not Image) {
+                        Object.Destroy(component);
                     }
                 }
 
@@ -169,8 +169,6 @@ namespace MissileScreen.UI
                 
                 profile.missilePanel = newPanel.transform;
             }
-           
-
 
             //// Panel Configuration \\\\
             // These will just use the values it had before if the profile values are unassigned
@@ -179,13 +177,13 @@ namespace MissileScreen.UI
             profile.missilePanel.GetComponent<RectTransform>().sizeDelta = profile.missilePanelRectSize != Vector2.zero ? profile.missilePanelRectSize : profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
 
             // Missile Panel Position
-            profile.missilePanel.GetComponent<RectTransform>().anchoredPosition = profile.missilePanelRectPosition != Profile.positionDefault ? profile.missilePanelRectPosition : profile.missilePanel.GetComponent<RectTransform>().anchoredPosition;
+            profile.missilePanel.GetComponent<RectTransform>().anchoredPosition = profile.missilePanelRectPosition != Profile._positionDefault ? profile.missilePanelRectPosition : profile.missilePanel.GetComponent<RectTransform>().anchoredPosition;
 
             // Missile Panel Rotation
-            profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile.rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
-
+            profile.missilePanel.localRotation = profile.missilePanelRectRotation != Profile._rotationDefault ? profile.missilePanelRectRotation : profile.missilePanel.localRotation;
+            
+            
             //Hierarchy - currently unused, keeping it just in case if I need it
-
             profile.missilePanel.SetSiblingIndex(profile.hierarchyOrder != -1 ? profile.hierarchyOrder : profile.missilePanel.GetSiblingIndex());
 
             profile.missilePanelSize = profile.missilePanel.GetComponent<RectTransform>().sizeDelta;
@@ -240,16 +238,19 @@ namespace MissileScreen.UI
 
             // Orientation Indicator
 
-            profile.orientationIndicator = new(
-                newName: "orientationIndicator",
-                uiParent: profile.velocityVector.GetGameObject().transform,
-                sprite: PluginSprites.orientationSprite,
-                imageColor: PluginConfig.orientationIndicatorColor.Value,
-                imageScale: new Vector3(3, 1, 0),
-                createOutline: true,
-                outlineColor: PluginConfig.orientationIndicatorOutlineColor.Value,
-                outlineThickness: new(PluginConfig.orientationIndicatorOutlineThickness.Value, PluginConfig.orientationIndicatorOutlineThickness.Value)
-            );
+            if (!PluginConfig.hideOrientationIndicator.Value)
+            {
+                profile.orientationIndicator = new(
+                    newName: "orientationIndicator",
+                    uiParent: profile.velocityVector.GetGameObject().transform,
+                    sprite: PluginSprites.orientationSprite,
+                    imageColor: PluginConfig.orientationIndicatorColor.Value,
+                    imageScale: new Vector3(3, 1, 0),
+                    createOutline: true,
+                    outlineColor: PluginConfig.orientationIndicatorOutlineColor.Value,
+                    outlineThickness: new(PluginConfig.orientationIndicatorOutlineThickness.Value, PluginConfig.orientationIndicatorOutlineThickness.Value)
+                    );
+            }
           
 
 
@@ -265,7 +266,6 @@ namespace MissileScreen.UI
                 outlineColor:PluginConfig.leadIconOutlineColor.Value,
                 outlineThickness:new(PluginConfig.leadIconOutlineThickness.Value, PluginConfig.leadIconOutlineThickness.Value)
             );
-
 
 
             // Lockbox
@@ -289,7 +289,79 @@ namespace MissileScreen.UI
             CreateLockBoxCorner(profile.lockBox.transform, new(-profile.lockboxCornerScale, -profile.lockboxCornerScale, 0), new(1, 0), new(0, 1),profile);
             CreateLockBoxCorner(profile.lockBox.transform, new(profile.lockboxCornerScale, -profile.lockboxCornerScale, 0), new(0, 0), new(0, 1),profile);
 
+            // Pitch Indicator
 
+      
+            
+            if (!PluginConfig.hidePitchIndicator.Value)
+            {
+                GameObject pitchIndicator = new GameObject("PitchIndicator")
+                {
+                    transform =
+                    {
+                        localScale = Vector3.one,
+                        localEulerAngles =  Vector3.zero,
+                        localPosition =  Vector3.zero,
+                    }
+                };
+                profile.pitchIndicator = pitchIndicator.AddComponent<RectTransform>();
+                
+                pitchIndicator.transform.SetParent(profile.missilePanel,false);
+                profile.pitchIndicator.sizeDelta = new(30, (profile.missilePanelSize.y / PluginConfig.cameraFOV.Value) * profile.missilePanelSize.y);
+
+                if (PluginConfig.simplePitchIndicator.Value)
+                {
+                    // Pitch Label
+                    profile.pitchLabel = new(
+                        "pitchLabel",
+                        profile.velocityVector.GetRectTransform(),
+                        "0°",PluginConfig.pitchIndicatorColor.Value,
+                        Mathf.RoundToInt((profile.fontSize * 1.5f) * PluginConfig.globalFontScale.Value),
+                        PluginConfig.pitchIndicatorOutlineThickness.Value,
+                        PluginConfig.pitchIndicatorOutlineColor.Value
+                        );
+                    profile.pitchLabel.SetAnchorPivot(new(0.5f,1.4f),new(0.5f,1.4f),new(0.5f,1));
+                }
+                else
+                {
+                    // Pitch ladder
+                    
+                    for (int i = 0; i < 180 / profile.degreeIncrement ; i++)
+                    {
+                        int degree = (i * profile.degreeIncrement) ;
+                        int signedDegree = degree - 90;
+               
+                        if (signedDegree != 0 && PluginConfig.onlyShowHorizon.Value) continue;                    
+
+                        UIDraw.UILadderRung pitchLadderRung = new UIDraw.UILadderRung(
+                            signedDegree,
+                            signedDegree.ToString(),
+                            profile.pitchIndicator,
+                            $"{signedDegree}°",
+                            PluginConfig.pitchIndicatorColor.Value,
+                            Mathf.RoundToInt((profile.fontSize / 1.5f) * PluginConfig.globalFontScale.Value));
+                        pitchLadderRung.SetAnchorPivot(new (0.5f,0.5f),new (0.5f,0.5f),new (0.5f,0.5f));
+
+
+                        if (signedDegree == 0)
+                        {
+                            pitchLadderRung.SetText("");
+                            pitchLadderRung.GetGameObject().AddComponent<Image>().color = PluginConfig.pitchIndicatorColor.Value;
+                            pitchLadderRung.GetRectTransform().sizeDelta = new(40 * PluginConfig.horizonLineWidthScale.Value, 3);
+                        }
+                    
+                        profile.rungs.Add(pitchLadderRung);
+                    }
+                }
+
+                profile.useSimplePitchIndicator = PluginConfig.simplePitchIndicator.Value;
+            }
+            
+            // TODO: Yaw Indicator 
+            if (!PluginConfig.hideHeadingIndicator.Value)
+            {
+                
+            }
             
             // Labels \\
             
@@ -471,7 +543,26 @@ namespace MissileScreen.UI
                     new(1, 1)
                     );
             }
+    
+            
+            // Adding Mask 
+            Image img = profile.missilePanel.gameObject.GetComponent<Image>();
+            if (!img)
+            {
+                img = profile.missilePanel.gameObject.AddComponent<Image>();
+            }
+            
 
+            Texture2D texture = new Texture2D(1, 1);
+            texture.SetPixel(0,0,Color.white);
+            texture.Apply();
+
+            img.sprite = Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(0.5f,0.5f),1f);
+            
+            profile.missilePanel.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+
+
+            
             currentProfile = profile;
 
         }

@@ -12,8 +12,8 @@ namespace MissileScreen.UI
     {
         // Public Static
 
-        public static readonly Quaternion rotationDefault = Quaternion.Euler(1,1,1);
-        public static readonly Vector2 positionDefault = new Vector2(1.0001f, 1.001f); // yes really specific ik...
+        public static readonly Quaternion _rotationDefault = Quaternion.Euler(1,1,1);
+        public static readonly Vector2 _positionDefault = new Vector2(1.0001f, 1.001f); // yes really specific ik...
 
 
 
@@ -28,12 +28,15 @@ namespace MissileScreen.UI
         public UIDraw.UILabel missileToF;
         public UIDraw.UILabel missileRange;
         public UIDraw.UILabel missileAltitude;
-
-
+        
         public UIDraw.UIImage velocityVector;
         public UIDraw.UIImage orientationIndicator;
         public UIDraw.UIImage leadIcon;
+        public UIDraw.UIText pitchLabel;
 
+        public RectTransform pitchIndicator;
+        public RectTransform yawIndicator;
+        
         public GameObject lockBox;
         public readonly List<Image> lockboxCorners = [];
 
@@ -46,15 +49,20 @@ namespace MissileScreen.UI
         
         public Vector2 missilePanelSize;
 
+        public bool useSimplePitchIndicator = true;
+        
+        public int degreeIncrement = 10;
+        public List<UIDraw.UILadderRung> rungs = [];
+        
         // Hides a specific game object from the TacScreen when the missile is active.
         public readonly List<GameObject>  hideGameObjects = new List<GameObject>();
 
 
         // Unique Aircraft Config
 
-        public Vector2 missilePanelRectPosition = positionDefault;
+        public Vector2 missilePanelRectPosition = _positionDefault;
         public Vector2 missilePanelRectSize;
-        public Quaternion missilePanelRectRotation = rotationDefault;
+        public Quaternion missilePanelRectRotation = _rotationDefault;
 
      
 
@@ -86,8 +94,10 @@ namespace MissileScreen.UI
             lockBox?.SetActive(active) ;
          
             leadIcon?.SetActive(active);
-
-           
+            
+            if (pitchIndicator && pitchIndicator.gameObject) pitchIndicator.gameObject.SetActive(active);
+            if (yawIndicator && yawIndicator.gameObject) yawIndicator.gameObject.SetActive(active);
+            
           
             missileIndex?.SetActive(active);
             
@@ -96,16 +106,13 @@ namespace MissileScreen.UI
             missileRange?.SetActive(active);
             missileAltitude?.SetActive(active);
             missileTargetName?.SetActive(active);
-           
 
-            if (hideGameObjects.Count > 0)
+
+            if (hideGameObjects.Count <= 0) return;
+
+            foreach (GameObject go in hideGameObjects.Where(go => go))
             {
-                foreach (GameObject go in hideGameObjects)
-                {
-
-                    if (go) go.SetActive(!active);
-                    
-                }
+                go.SetActive(!active);
             }
 
 
@@ -153,9 +160,6 @@ namespace MissileScreen.UI
             
         }
 
-        
-        
-        
 
         private static string FormatTime(float time)
         {
@@ -256,6 +260,43 @@ namespace MissileScreen.UI
             }
         }
 
+    
+        public void UpdatePitchIndicator(Transform missileAngle)
+        {
+          
+            
+            
+            float pitch = Mathf.Asin(Mathf.Clamp(missileAngle.forward.y,-1,1)) * Mathf.Rad2Deg;
+
+
+            if (useSimplePitchIndicator)
+            {
+                pitchLabel?.SetText($"{Mathf.Floor(pitch)}°");
+            }
+            else
+            {
+                foreach (UIDraw.UILadderRung rung in rungs)
+                {
+                    if (!rung.GetGameObject())
+                    {
+                        rungs.Remove(rung);
+                        return;
+                    }
+                
+                    float rel = rung.degree - pitch;
+                    float pitchOffset = (Mathf.Tan(rel * Mathf.Deg2Rad) / Mathf.Tan((float)PluginConfig.cameraFOV.Value * Mathf.Deg2Rad * 0.5f)) * (missilePanelSize.y * 0.5f);
+                
+                    rung.SetPosition(new Vector2(-missilePanelSize.x * PluginConfig.pitchIndicatorPanelPosition.Value,pitchOffset));
+                }
+            
+
+                Vector3 upwardVectorRef = Vector3.ProjectOnPlane(Vector3.up,missileAngle.forward).normalized;
+                float roll = Vector3.SignedAngle(upwardVectorRef, missileAngle.up, missileAngle.forward);
+
+                pitchIndicator.localEulerAngles = new(0,0,-roll);
+            }
+        }
+        
         public void UpdateElementsColor()
         {
             Plugin.logger.LogDebug(missileRange == null);
@@ -270,10 +311,16 @@ namespace MissileScreen.UI
             orientationIndicator?.SetColor();
             leadIcon?.SetColor();
             velocityVector?.SetColor();
+            
 
             foreach (Image lockboxImage in lockboxCorners.Where(lockboxImage => lockboxImage))
             {
                 lockboxImage.color = PluginConfig.lockBoxColor.Value.WithAlpha(PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
+            }
+
+            foreach (UIDraw.UILadderRung rung in rungs)
+            {
+                rung.SetColor(PluginConfig.pitchIndicatorColor.Value);
             }
             
             if (screenImage) screenImage.color = new(1, 1, 1, PluginConfig.hmdMissileScreen.Value ? PluginConfig.hmdMissileScreenTransparency.Value : 1);
@@ -282,7 +329,9 @@ namespace MissileScreen.UI
 
         public void Destroy()
         {
-            Object.Destroy(missilePanel);
+            rungs.Clear();
+            Object.Destroy(missilePanel.gameObject);
+            
         }
 
     }
